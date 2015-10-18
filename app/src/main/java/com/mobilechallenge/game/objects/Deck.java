@@ -1,6 +1,6 @@
 package com.mobilechallenge.game.objects;
 
-import com.mobilechallenge.game.programs.TextureProgram;
+import com.mobilechallenge.game.programs.DefaultTextureProgram;
 import com.mobilechallenge.game.utils.VertexArray;
 
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
@@ -30,7 +30,7 @@ public class Deck implements Drawable {
     vertexArray = new VertexArray(VERTEX_DATA);
   }
 
-  public void bindData(TextureProgram textureProgram) {
+  public void bindData(DefaultTextureProgram textureProgram) {
     vertexArray.setVertexAttribPointer(0, textureProgram.getPositionAttributeLocation(),
         POSITION_COMPONENT_COUNT, STRIDE);
 

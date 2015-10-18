@@ -25,35 +25,30 @@ public class GameActivity extends AppCompatActivity {
     initSurface();
   }
 
-  @Override
-  protected void onResume() {
+  @Override protected void onResume() {
     super.onResume();
 
-    if(mRenderSet) {
+    if (mRenderSet) {
       mGlSurfaceView.onResume();
     }
   }
 
-  @Override
-  protected void onPause() {
+  @Override protected void onPause() {
     super.onPause();
 
-    if(mRenderSet) {
+    if (mRenderSet) {
       mGlSurfaceView.onPause();
     }
   }
 
   private void initSurface() {
     final ActivityManager activityManager =
-        (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-    final ConfigurationInfo configurationInfo =
-        activityManager.getDeviceConfigurationInfo();
-    final boolean supportEs2 =
-        configurationInfo.reqGlEsVersion >= 0x20000;
-    final GameRenderer renderer =
-        new GameRenderer(this);
+        (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
+    final boolean supportEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
+    final GameRenderer renderer = new GameRenderer(this);
 
-    if(supportEs2) {
+    if (supportEs2) {
       //Request an Open ES 2.0 compatible context.
       mGlSurfaceView.setEGLContextClientVersion(2);
       mGlSurfaceView.setRenderer(renderer);

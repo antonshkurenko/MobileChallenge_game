@@ -17,7 +17,7 @@ import static android.opengl.GLES20.glUniformMatrix4fv;
  * Date: 10/18/15
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
-public class TextureProgram extends AbstractShaderProgram {
+public class DefaultTextureProgram extends AbstractShaderProgram {
 
   //Uniforms
   private final int uMatrixLocation;
@@ -27,14 +27,14 @@ public class TextureProgram extends AbstractShaderProgram {
   private final int aPositionLocation;
   private final int aTextureCoordinatesLocation;
 
-  public TextureProgram(Context context) {
+  public DefaultTextureProgram(Context context) {
     super(context, R.raw.texture_vertex_shader, R.raw.texture_fragment_shader);
 
-    uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
-    uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
+    uMatrixLocation = glGetUniformLocation(mProgram, U_MATRIX);
+    uTextureUnitLocation = glGetUniformLocation(mProgram, U_TEXTURE_UNIT);
 
-    aPositionLocation = glGetAttribLocation(program, A_POSITION);
-    aTextureCoordinatesLocation = glGetAttribLocation(program, A_TEXTURE_COORDINATES);
+    aPositionLocation = glGetAttribLocation(mProgram, A_POSITION);
+    aTextureCoordinatesLocation = glGetAttribLocation(mProgram, A_TEXTURE_COORDINATES);
   }
 
   public void setUniforms(float[] matrix, int textureId) {
