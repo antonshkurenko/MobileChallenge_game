@@ -11,6 +11,7 @@ import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glViewport;
+import static android.opengl.Matrix.orthoM;
 
 /**
  * Project: Game
@@ -20,6 +21,8 @@ import static android.opengl.GLES20.glViewport;
 public class AnotherOneRenderer implements GLSurfaceView.Renderer {
 
   private final Context mContext;
+
+  private final float[] mProjectionMatrix = new float[16];
 
   private SimpleShaderProgram mSimpleShaderProgram;
 
@@ -42,12 +45,23 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
 
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
     glViewport(0, 0, width, height);
+
+    final float aspectRatio = width > height ?
+        (float) width / (float) height :
+        (float) height / (float) width;
+    if (width > height) {
+      // Landscape
+      orthoM(mProjectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f);
+    } else {
+      // Portrait or square
+      orthoM(mProjectionMatrix, 0, -1f, 1f, -aspectRatio, aspectRatio, -1f, 1f);
+    }
   }
 
   @Override public void onDrawFrame(GL10 gl) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    mSimpleShaderProgram.setUniforms(1f, 1f, 1f);
+    mSimpleShaderProgram.setUniforms(mProjectionMatrix);
     mDeck.draw();
   }
 }

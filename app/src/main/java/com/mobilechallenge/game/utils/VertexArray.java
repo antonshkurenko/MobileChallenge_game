@@ -30,7 +30,6 @@ public class VertexArray {
     mFloatBuffer.position(dataOffset);
     glVertexAttribPointer(attributeLocation, componentCount, GL_FLOAT, false, stride, mFloatBuffer);
     glEnableVertexAttribArray(attributeLocation);
-
     mFloatBuffer.position(0);
   }
 
