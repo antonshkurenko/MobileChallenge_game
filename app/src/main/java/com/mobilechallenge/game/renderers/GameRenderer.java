@@ -31,8 +31,19 @@ import static android.opengl.Matrix.translateM;
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
 public class GameRenderer implements GLSurfaceView.Renderer {
+  @Override public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-  private static final float LEFT_BOUND = -0.5f;
+  }
+
+  @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
+
+  }
+
+  @Override public void onDrawFrame(GL10 gl) {
+
+  }
+
+  /*private static final float LEFT_BOUND = -0.5f;
   private static final float RIGHT_BOUND = 0.5f;
   private static final float FAR_BOUND = -0.8f;
   private static final float NEAR_BOUND = 0.8f;
@@ -85,9 +96,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
     glViewport(0, 0, width, height);
 
-    perspectiveM(mProjectionMatrix, 0, 45, (float) height / (float) width, 1f, 10f);
+    perspectiveM(mProjectionMatrix, 0, 45, (float) width / (float) height, 1f, 10f);
 
-    setLookAtM(mViewMatrix, 0, 0f, 2f, 2f, 0f, 0f, 0f, 0f, 2f, 0f);
+    setLookAtM(mViewMatrix, 0, 0, 2, 0f, 0f, 0f, 0f, 0f, 0f, 0.0f);
   }
 
   @Override public void onDrawFrame(GL10 gl) {
@@ -147,13 +158,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     multiplyMM(mModelViewProjectionMatrix, 0, mViewProjectionMatrix, 0, mModelMatrix, 0);
   }
 
-  /**
+  *//**
    * Convert screen touch point to the ray to handle touches in openGL
    *
    * @param normalizedX x
    * @param normalizedY y
    * @return ray
-   */
+   *//*
   private Geometry.Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY) {
 
     final float[] nearPointNdc = { normalizedX, normalizedY, -1, 1 };
@@ -182,15 +193,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     vector[2] /= vector[3];
   }
 
-  /**
+  *//**
    * That was for dragging, it tried to keep chip in the bounds of the table
    *
    * @param value dragged x/y
    * @param min min x/y
    * @param max max x/y
    * @return return x/y
-   */
+   *//*
   private float clamp(float value, float min, float max) {
     return Math.min(max, Math.max(value, min));
-  }
+  }*/
 }
