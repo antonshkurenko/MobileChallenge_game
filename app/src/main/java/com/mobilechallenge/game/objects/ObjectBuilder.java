@@ -26,10 +26,21 @@ public class ObjectBuilder {
 
     int size = sizeOfCircleInVertices(numPoints);
 
-    // visible top
-    Geometry.Circle topCircle = new Geometry.Circle(center, radius);
+    Geometry.Circle circle = new Geometry.Circle(center, radius);
 
-    return new ObjectBuilder(size).appendCircle(topCircle, numPoints, aspectRatio).build();
+    return new ObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
+  }
+
+  // creating image of the enemy
+  static GeneratedData createEnemy(Geometry.Point center, float radius, int numPoints,
+      float aspectRatio) {
+
+    int size = sizeOfCircleInVertices(numPoints);
+
+    // visible top
+    Geometry.Circle circle = new Geometry.Circle(center, radius);
+
+    return new ObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
   }
 
   private static int sizeOfCircleInVertices(int numPoints) {
