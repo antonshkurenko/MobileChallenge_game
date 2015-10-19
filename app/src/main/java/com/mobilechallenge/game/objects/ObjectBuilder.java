@@ -21,15 +21,15 @@ public class ObjectBuilder {
   private int mOffset = 0;
 
   // creating image of the chip
-  static GeneratedData createChip(Geometry.Point center, float radius, int numPoints) {
+  static GeneratedData createChip(Geometry.Point center, float radius, int numPoints,
+      float aspectRatio) {
 
     int size = sizeOfCircleInVertices(numPoints);
 
     // visible top
-    Geometry.Circle topCircle =
-        new Geometry.Circle(center, radius);
+    Geometry.Circle topCircle = new Geometry.Circle(center, radius);
 
-    return new ObjectBuilder(size).appendCircle(topCircle, numPoints).build();
+    return new ObjectBuilder(size).appendCircle(topCircle, numPoints, aspectRatio).build();
   }
 
   private static int sizeOfCircleInVertices(int numPoints) {
@@ -40,7 +40,7 @@ public class ObjectBuilder {
     mVertexData = new float[sizeInVertices * FLOATS_PER_VERTEX];
   }
 
-  private ObjectBuilder appendCircle(Geometry.Circle circle, int numPoints) {
+  private ObjectBuilder appendCircle(Geometry.Circle circle, int numPoints, float aspectRatio) {
 
     final int startVertex = mOffset / FLOATS_PER_VERTEX;
     final int numVertices = sizeOfCircleInVertices(numPoints);
@@ -51,7 +51,8 @@ public class ObjectBuilder {
     for (int i = 0; i <= numPoints; i++) {
       float angleInRadians = ((float) i / (float) numPoints) * ((float) Math.PI * 2f);
 
-      mVertexData[mOffset++] = circle.center.x + circle.radius * (float) Math.cos(angleInRadians);
+      mVertexData[mOffset++] =
+          circle.center.x + circle.radius * (float) Math.cos(angleInRadians) / aspectRatio;
 
       mVertexData[mOffset++] = circle.center.y + circle.radius * (float) Math.sin(angleInRadians);
     }

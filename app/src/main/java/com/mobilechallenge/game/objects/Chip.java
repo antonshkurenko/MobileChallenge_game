@@ -19,11 +19,11 @@ public class Chip implements Drawable {
   private final VertexArray mVertexArray;
   private final List<Drawable> mDrawList;
 
-  public Chip(float radius, int numPointsAroundChip) {
+  public Chip(float radius, int numPointsAroundChip, float aspectRatio) {
 
     ObjectBuilder.GeneratedData generatedData =
         ObjectBuilder.createChip(new Geometry.Point(0f, 0f, 0f), radius,
-            numPointsAroundChip);
+            numPointsAroundChip, aspectRatio);
 
     this.radius = radius;
 

@@ -65,7 +65,7 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
 
     Timber.i("Width is %d, height is %d, aspect is %f", width, height, mAspectRatio);
 
-    mChip = new Chip(0.15f, 32);
+    mChip = new Chip(0.15f, 32, mAspectRatio);
 
     mChipPosition = new Geometry.Point(0f, 0f, 0f);
     mChipVector = new Geometry.Vector(0.005f, 0f, 0f);
