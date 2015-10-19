@@ -27,7 +27,7 @@ public class ObjectBuilder {
 
     // visible top
     Geometry.Circle topCircle =
-        new Geometry.Circle(center.translateY(0.05f), radius); // check translate values
+        new Geometry.Circle(center, radius);
 
     return new ObjectBuilder(size).appendCircle(topCircle, numPoints).build();
   }
