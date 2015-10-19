@@ -78,22 +78,22 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
     glViewport(0, 0, width, height);
 
+    // currently it's width / height, because it's landscape
     mAspectRatio = width > height ? (float) width / (float) height : (float) height / (float) width;
 
     Timber.i("Width is %d, height is %d, aspect is %f", width, height, mAspectRatio);
 
     mChip = new Chip(0.15f, 32, mAspectRatio);
 
-    final float ENEMY_RADIUS = 0.075f;
-    mEnemy = new Enemy(ENEMY_RADIUS, 32, mAspectRatio);
+    mEnemy = new Enemy(0.075f, 32, mAspectRatio);
 
     mChipPosition = new Geometry.Point(0f, 0f, 0f);
     mChipVector = new Geometry.Vector(0.005f, 0f, 0f);
 
-    final float rightX = RIGHT_BOUND - ENEMY_RADIUS / mAspectRatio;
-    final float topY = TOP_BOUND - ENEMY_RADIUS;
-    final float leftX = LEFT_BOUND + ENEMY_RADIUS / mAspectRatio;
-    final float bottomY = BOTTOM_BOUND + ENEMY_RADIUS;
+    final float rightX = RIGHT_BOUND - mEnemy.radius / mAspectRatio;
+    final float topY = TOP_BOUND - mEnemy.radius;
+    final float leftX = LEFT_BOUND + mEnemy.radius / mAspectRatio;
+    final float bottomY = BOTTOM_BOUND + mEnemy.radius;
 
     Timber.i("rightX = %f, leftX = %f, topY = %f, bottomY = %f", rightX, leftX, topY, bottomY);
 
@@ -117,6 +117,23 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
     mChipPosition = mChipPosition.translate(mChipVector);
     for (int i = 0; i < 4; i++) {
       mEnemyPositions.set(i, mEnemyPositions.get(i).translate(mEnemyVectors.get(i)));
+      mEnemyVectors.set(i, mEnemyVectors.get(i).scale(1.01f));
+
+      final Geometry.Point position = mEnemyPositions.get(i);
+      final Geometry.Vector vector = mEnemyVectors.get(i);
+
+      if (position.x < LEFT_BOUND + mEnemy.radius / mAspectRatio
+          || position.x > RIGHT_BOUND - mEnemy.radius / mAspectRatio) {
+        mEnemyVectors.set(i, new Geometry.Vector(-vector.x, vector.y));
+      }
+      if (position.y > TOP_BOUND - mEnemy.radius || position.y < BOTTOM_BOUND + mEnemy.radius) {
+        mEnemyVectors.set(i, new Geometry.Vector(vector.x, -vector.y));
+      }
+
+      mEnemyPositions.set(i, new Geometry.Point(
+          clamp(position.x, LEFT_BOUND + mEnemy.radius / mAspectRatio,
+              RIGHT_BOUND - mEnemy.radius / mAspectRatio),
+          clamp(position.y, BOTTOM_BOUND + mEnemy.radius, TOP_BOUND - mEnemy.radius)));
     }
 
     mVaryingColorProgram.useProgram();
@@ -142,5 +159,17 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
     setIdentityM(mModelMatrix, 0);
     translateM(mModelMatrix, 0, x, y, 0f);
     multiplyMM(mModelProjectionMatrix, 0, mProjectionMatrix, 0, mModelMatrix, 0);
+  }
+
+  /**
+   * Keep object in the bounds of the deck
+   *
+   * @param value current x/y
+   * @param min deck min x/y
+   * @param max deck max x/y
+   * @return return x/y
+   */
+  private float clamp(float value, float min, float max) {
+    return Math.min(max, Math.max(value, min));
   }
 }
