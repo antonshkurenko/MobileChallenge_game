@@ -15,8 +15,8 @@ public abstract class AbstractShaderProgram {
 
   //Uniforms
   protected static final String U_MATRIX = "u_Matrix";
-  protected static final String U_TEXTURE_UNIT = "u_TextureUnit";
   protected static final String U_COLOR = "u_Color";
+  protected static final String U_TEXTURE_UNIT = "u_TextureUnit";
 
   //Attributes
   protected static final String A_POSITION = "a_Position";

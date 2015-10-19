@@ -1,6 +1,6 @@
 package com.mobilechallenge.game.objects;
 
-import com.mobilechallenge.game.programs.SimpleShaderProgram;
+import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.utils.VertexArray;
 
 import static android.opengl.GLES20.GL_TRIANGLE_FAN;
@@ -24,11 +24,11 @@ public class Deck implements Drawable {
       // Order of coordinates: X, Y, R, G, B
       // Triangle Fan
       0f, 0f, 1f, 1f, 1f,
-      -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-      0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-      0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-      -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-      -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+      -0.95f, -0.95f, 0.7f, 0.7f, 0.7f,
+      0.95f, -0.95f, 0.7f, 0.7f, 0.7f,
+      0.95f, 0.95f, 0.7f, 0.7f, 0.7f,
+      -0.95f, 0.95f, 0.7f, 0.7f, 0.7f,
+      -0.95f, -0.95f, 0.7f, 0.7f, 0.7f,
   };
   // @formatter:on
 
@@ -38,7 +38,7 @@ public class Deck implements Drawable {
     mVertexArray = new VertexArray(VERTEX_DATA);
   }
 
-  public void bindData(SimpleShaderProgram shaderProgram) {
+  public void bindData(SimpleVaryingColorShaderProgram shaderProgram) {
     mVertexArray.setVertexAttribPointer(0, shaderProgram.getPositionLocation(),
         POSITION_COMPONENT_COUNT, STRIDE);
 

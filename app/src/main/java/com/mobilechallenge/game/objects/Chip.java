@@ -1,6 +1,6 @@
 package com.mobilechallenge.game.objects;
 
-import com.mobilechallenge.game.programs.DefaultColorProgram;
+import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.utils.Geometry;
 import com.mobilechallenge.game.utils.VertexArray;
 import java.util.List;
@@ -13,28 +13,26 @@ import java.util.List;
 public class Chip implements Drawable {
 
   public final float radius;
-  public final float height;
 
-  private static final int POSITION_COMPONENT_COUNT = 3;
+  private static final int POSITION_COMPONENT_COUNT = 2;
 
   private final VertexArray mVertexArray;
   private final List<Drawable> mDrawList;
 
-  public Chip(float radius, float height, int numPointsAroundChip) {
+  public Chip(float radius, int numPointsAroundChip) {
 
     ObjectBuilder.GeneratedData generatedData =
-        ObjectBuilder.createChip(new Geometry.Point(0f, 0f, 0f), radius, height,
+        ObjectBuilder.createChip(new Geometry.Point(0f, 0f, 0f), radius,
             numPointsAroundChip);
 
     this.radius = radius;
-    this.height = height;
 
     mVertexArray = new VertexArray(generatedData.mVertexData);
     mDrawList = generatedData.mDrawableList;
   }
 
-  public void bindData(DefaultColorProgram colorProgram) {
-    mVertexArray.setVertexAttribPointer(0, colorProgram.getPositionAttributeLocation(),
+  public void bindData(SimpleSingleColorShaderProgram colorProgram) {
+    mVertexArray.setVertexAttribPointer(0, colorProgram.getPositionLocation(),
         POSITION_COMPONENT_COUNT, 0);
   }
 
