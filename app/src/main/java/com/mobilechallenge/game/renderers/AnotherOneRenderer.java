@@ -8,8 +8,10 @@ import com.mobilechallenge.game.objects.Enemy;
 import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.utils.Geometry;
+import com.mobilechallenge.game.utils.Gyroscope;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import timber.log.Timber;
@@ -30,8 +32,6 @@ import static android.opengl.Matrix.translateM;
  */
 public class AnotherOneRenderer implements GLSurfaceView.Renderer {
 
-  private final Context mContext;
-
   private static final float RIGHT_BOUND = 0.95f;
   private static final float LEFT_BOUND = -0.95f;
   private static final float TOP_BOUND = 0.95f;
@@ -48,6 +48,9 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
   private SimpleVaryingColorShaderProgram mVaryingColorProgram;
   private SimpleSingleColorShaderProgram mSingleColorProgram;
 
+  private final Context mContext;
+  private final Gyroscope mGyroscope;
+
   // views
   private Deck mDeck;
   private Chip mChip;
@@ -60,8 +63,9 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
   private List<Geometry.Point> mEnemyPositions; // positions
   private List<Geometry.Vector> mEnemyVectors; // speed
 
-  public AnotherOneRenderer(Context ctx) {
+  public AnotherOneRenderer(Context ctx, Gyroscope gyroscope) {
     mContext = ctx;
+    mGyroscope = gyroscope;
 
     mEnemyPositions = new ArrayList<>();
     mEnemyVectors = new ArrayList<>();
@@ -88,7 +92,7 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
     mEnemy = new Enemy(0.075f, 32, mAspectRatio);
 
     mChipPosition = new Geometry.Point(0f, 0f, 0f);
-    mChipVector = new Geometry.Vector(0.005f, 0f, 0f);
+    mChipVector = new Geometry.Vector(0f, 0f, 0f);
 
     final float rightX = RIGHT_BOUND - mEnemy.radius / mAspectRatio;
     final float topY = TOP_BOUND - mEnemy.radius;
@@ -114,7 +118,30 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
   @Override public void onDrawFrame(GL10 gl) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    final Random rnd = new Random();
+
+    final float[] orientation = mGyroscope.getOrientationArray(); // 0 x, 1 y
+
+    Timber.d("Orientation x is %f, y is %f", orientation[0], orientation[1]);
+
+    mChipVector = new Geometry.Vector(mChipVector.x - orientation[0] / 500,
+        mChipVector.y - orientation[1] / 500); // do smth with controls
     mChipPosition = mChipPosition.translate(mChipVector);
+
+    if (mChipPosition.x < LEFT_BOUND + mEnemy.radius / mAspectRatio
+        || mChipPosition.x > RIGHT_BOUND - mEnemy.radius / mAspectRatio) {
+      mChipVector = new Geometry.Vector(0f, 0f);
+    }
+    if (mChipPosition.y > TOP_BOUND - mEnemy.radius
+        || mChipPosition.y < BOTTOM_BOUND + mEnemy.radius) {
+      mChipVector = new Geometry.Vector(0f, 0f);
+    }
+
+    mChipPosition = new Geometry.Point(
+        clamp(mChipPosition.x, LEFT_BOUND + mChip.radius / mAspectRatio,
+            RIGHT_BOUND - mChip.radius / mAspectRatio),
+        clamp(mChipPosition.y, BOTTOM_BOUND + mChip.radius, TOP_BOUND - mChip.radius));
+
     for (int i = 0; i < 4; i++) {
       mEnemyPositions.set(i, mEnemyPositions.get(i).translate(mEnemyVectors.get(i)));
       mEnemyVectors.set(i, mEnemyVectors.get(i).scale(1.01f));
@@ -124,10 +151,10 @@ public class AnotherOneRenderer implements GLSurfaceView.Renderer {
 
       if (position.x < LEFT_BOUND + mEnemy.radius / mAspectRatio
           || position.x > RIGHT_BOUND - mEnemy.radius / mAspectRatio) {
-        mEnemyVectors.set(i, new Geometry.Vector(-vector.x, vector.y));
+        mEnemyVectors.set(i, vector.rotateRandom(rnd));
       }
       if (position.y > TOP_BOUND - mEnemy.radius || position.y < BOTTOM_BOUND + mEnemy.radius) {
-        mEnemyVectors.set(i, new Geometry.Vector(vector.x, -vector.y));
+        mEnemyVectors.set(i, vector.rotateRandom(rnd));
       }
 
       mEnemyPositions.set(i, new Geometry.Point(

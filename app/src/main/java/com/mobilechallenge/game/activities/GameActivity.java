@@ -11,11 +11,14 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.mobilechallenge.game.R;
 import com.mobilechallenge.game.renderers.AnotherOneRenderer;
+import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 
 public class GameActivity extends AppCompatActivity {
 
   @Bind(R.id.gl_surface) GameGlSurfaceView mGlSurfaceView;
+
+  private Gyroscope mGyroscope;
 
   private boolean mRenderSet = false;
 
@@ -23,6 +26,8 @@ public class GameActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_game);
     ButterKnife.bind(this);
+
+    mGyroscope = new Gyroscope(this);
     initSurface();
   }
 
@@ -32,14 +37,21 @@ public class GameActivity extends AppCompatActivity {
     if (mRenderSet) {
       mGlSurfaceView.onResume();
     }
+
+    mGyroscope.start();
   }
 
   @Override protected void onPause() {
-    super.onPause();
-
     if (mRenderSet) {
       mGlSurfaceView.onPause();
     }
+
+    super.onPause();
+  }
+
+  @Override protected void onStop() {
+    mGyroscope.stop();
+    super.onStop();
   }
 
   private void initSurface() {
@@ -47,7 +59,7 @@ public class GameActivity extends AppCompatActivity {
         (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
     final boolean supportEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
-    final GLSurfaceView.Renderer renderer = new AnotherOneRenderer(this);
+    final GLSurfaceView.Renderer renderer = new AnotherOneRenderer(this, mGyroscope);
 
     if (supportEs2) {
       //Request an Open ES 2.0 compatible context.

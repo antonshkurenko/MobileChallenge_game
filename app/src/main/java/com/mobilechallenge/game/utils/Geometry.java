@@ -1,5 +1,7 @@
 package com.mobilechallenge.game.utils;
 
+import java.util.Random;
+
 /**
  * Project: Game
  * Date: 10/18/15
@@ -97,6 +99,16 @@ public class Geometry {
 
     public Vector scale(float f) {
       return new Vector(x * f, y * f, z * f);
+    }
+
+    public Vector rotateRandom(Random r) {
+
+      double angle = r.nextFloat() * 2 * Math.PI;
+
+      return new Vector(
+        x * (float) Math.cos(angle) - y * (float) Math.sin(angle),
+          x * (float) Math.sin(angle) + y * (float) Math.cos(angle)
+      );
     }
   }
 
