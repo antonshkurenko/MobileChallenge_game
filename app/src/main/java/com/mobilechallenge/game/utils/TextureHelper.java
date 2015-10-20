@@ -3,6 +3,7 @@ package com.mobilechallenge.game.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.DrawableRes;
 import timber.log.Timber;
 
 import static android.opengl.GLES20.GL_LINEAR;
@@ -55,8 +56,57 @@ public class TextureHelper {
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     return textureObjectIds[0];
+  }
+
+  public static int[] loadTextures(Context ctx, @DrawableRes int... resourceIds) {
+
+    if (resourceIds.length == 0) {
+      throw new IllegalArgumentException("You didn't passed resourceIds for textures");
+    }
+
+    final int[] textureObjectIds = new int[resourceIds.length];
+    glGenTextures(resourceIds.length, textureObjectIds, 0);
+
+    for (int i = 0; i < textureObjectIds.length; i++) {
+      if (textureObjectIds[i] == 0) {
+        Timber.w("Could not generate a new OpenGL texture object.");
+        return null;
+      }
+
+      final BitmapFactory.Options options = new BitmapFactory.Options();
+      options.inScaled = false;
+
+      final Bitmap bitmap =
+          BitmapFactory.decodeResource(ctx.getResources(), resourceIds[i], options);
+
+      if (bitmap == null) {
+        Timber.w("Resource ID %d could not be decoded.", resourceIds[i]);
+
+        glDeleteTextures(1, textureObjectIds, i);
+        return null;
+      }
+
+      glBindTexture(GL_TEXTURE_2D, textureObjectIds[i]);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
+      bitmap.recycle();
+
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    return textureObjectIds;
+  }
+
+  public static float[] getTextureVertices(float[] vertices) {
+    final float[] textureVertices = new float[vertices.length];
+
+    for (int i = 0; i < vertices.length; i++) {
+      textureVertices[i] = (vertices[i] + 1) * 0.5f;
+      Timber.d("Converting %f to %f.", vertices[i], textureVertices[i]);
+    }
+    return textureVertices;
   }
 }

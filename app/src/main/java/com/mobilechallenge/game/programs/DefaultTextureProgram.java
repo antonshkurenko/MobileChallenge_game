@@ -37,14 +37,21 @@ public class DefaultTextureProgram extends AbstractShaderProgram {
     aTextureCoordinatesLocation = glGetAttribLocation(mProgram, A_TEXTURE_COORDINATES);
   }
 
-  public void setUniforms(float[] matrix, int textureId) {
+  /**
+   *
+   * @param matrix ModelViewProjection matrix
+   * @param textureId texture id, received from gl
+   * @param glTextureNum texture number, GL_TEXTURE0 + n
+   */
+  public void setUniforms(float[] matrix, int textureId, int glTextureNum) {
 
     glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0 + glTextureNum);
+
     glBindTexture(GL_TEXTURE_2D, textureId);
 
-    glUniform1i(uTextureUnitLocation, 0);
+    glUniform1i(uTextureUnitLocation, glTextureNum);
   }
 
   public int getPositionAttributeLocation() {

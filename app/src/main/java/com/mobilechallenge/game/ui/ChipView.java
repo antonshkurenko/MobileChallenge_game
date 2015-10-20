@@ -2,8 +2,10 @@ package com.mobilechallenge.game.ui;
 
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.Drawable;
+import com.mobilechallenge.game.programs.DefaultTextureProgram;
 import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.utils.Geometry;
+import com.mobilechallenge.game.utils.TextureHelper;
 import com.mobilechallenge.game.utils.VertexArray;
 import java.util.List;
 
@@ -17,9 +19,13 @@ public class ChipView implements Drawable {
   public final float radius;
 
   private static final int POSITION_COMPONENT_COUNT = 2;
+  private static final int TEXTURE_COORDINATES_COMPONENT_COUNT = 2;
 
   private final VertexArray mVertexArray;
+  private final VertexArray mTextureVertexArray;
   private final List<Drawable> mDrawList;
+
+  private int mTexture = 0;
 
   public ChipView(int numPointsAroundChip, float aspectRatio) {
 
@@ -30,7 +36,17 @@ public class ChipView implements Drawable {
             aspectRatio);
 
     mVertexArray = new VertexArray(generatedData.mVertexData);
+    mTextureVertexArray = new VertexArray(
+        TextureHelper.getTextureVertices(generatedData.mVertexData));
     mDrawList = generatedData.mDrawableList;
+  }
+
+  public int getTexture() {
+    return mTexture;
+  }
+
+  public void setTexture(int texture) {
+    mTexture = texture;
   }
 
   @Override public void draw() {
@@ -40,8 +56,15 @@ public class ChipView implements Drawable {
   }
 
   public void bindData(SimpleSingleColorShaderProgram program) {
-    mVertexArray.setVertexAttribPointer(0,
-        program.getPositionLocation(), POSITION_COMPONENT_COUNT,
+    mVertexArray.setVertexAttribPointer(0, program.getPositionLocation(), POSITION_COMPONENT_COUNT,
         0);
+  }
+
+  public void bindData(DefaultTextureProgram program) {
+    mVertexArray.setVertexAttribPointer(0, program.getPositionAttributeLocation(),
+        POSITION_COMPONENT_COUNT, 0);
+
+    mTextureVertexArray.setVertexAttribPointer(POSITION_COMPONENT_COUNT,
+        program.getTextureCoordinatesAttributeLocation(), TEXTURE_COORDINATES_COMPONENT_COUNT, 0);
   }
 }

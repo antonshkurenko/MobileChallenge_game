@@ -2,15 +2,18 @@ package com.mobilechallenge.game.renderers;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import com.mobilechallenge.game.R;
 import com.mobilechallenge.game.controllers.GameState;
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.EnemyObject;
+import com.mobilechallenge.game.programs.DefaultTextureProgram;
 import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.ui.ChipView;
 import com.mobilechallenge.game.ui.DeckView;
 import com.mobilechallenge.game.ui.EnemyView;
 import com.mobilechallenge.game.utils.Geometry;
+import com.mobilechallenge.game.utils.TextureHelper;
 import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -32,14 +35,21 @@ import static android.opengl.Matrix.translateM;
  */
 public class GameRenderer implements GLSurfaceView.Renderer {
 
+  private static final int ANGRY = 0;
+  private static final int VERY_ANGRY = 1;
+  private static final int SAD = 2;
+  private static final int SMILE = 3;
+
   // @formatter:off
     private final float[] mProjectionMatrix = new float[16];
    private final float[  ] mModelMatrix = new float[16];
   private final float[    ] mModelProjectionMatrix = new float[16];
+           private int [] mTextures;
   // @formatter:on
   private final Context mContext;
   private SimpleVaryingColorShaderProgram mVaryingColorProgram;
   private SimpleSingleColorShaderProgram mSingleColorProgram;
+  private DefaultTextureProgram mTextureProgram;
 
   private GameState mGameState;
 
@@ -47,6 +57,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private DeckView mDeckView;
   private ChipView mChipView;
   private EnemyView mEnemyView;
+
+  private int mTempTexture;
 
   private float mInterpolation = 0f;
 
@@ -65,7 +77,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     mVaryingColorProgram = new SimpleVaryingColorShaderProgram(mContext);
     mSingleColorProgram = new SimpleSingleColorShaderProgram(mContext);
+    mTextureProgram = new DefaultTextureProgram(mContext);
+
     mDeckView = new DeckView(); // since it doesn't need aspect ratio, it's initialized here
+
+    mTextures = TextureHelper.loadTextures(mContext, R.drawable.texture_angry_256_256,
+        R.drawable.texture_very_angry_256_256, R.drawable.texture_sad_512_512,
+        /*R.drawable.texture_smile_512_512*/ R.drawable.texture_test_256_256);
+
+    //mTempTexture = TextureHelper.loadTexture(mContext, R.drawable.texture_test_256_256);
   }
 
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -97,21 +117,27 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     final ChipObject chip = mGameState.getChipObject();
     final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
 
-    mSingleColorProgram.useProgram();
-    mChipView.bindData(mSingleColorProgram);
+
+    /*glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+
+    mTextureProgram.useProgram();
+    mChipView.bindData(mTextureProgram);
     positionObjectInScene(chipPosition.x, chipPosition.y);
-    mSingleColorProgram.setUniforms(mModelProjectionMatrix, 1f, 0f, 0f);
+    mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[SMILE], 0);
     chip.draw();
 
     final List<EnemyObject> enemies = mGameState.getEnemyObjects();
 
-    mEnemyView.bindData(mSingleColorProgram);
-    for (EnemyObject enemy : enemies) {
+    mEnemyView.bindData(mTextureProgram);
+    for (int i = 0; i < enemies.size(); i++) {
+      final EnemyObject enemy = enemies.get(i);
       final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
       positionObjectInScene(enemyPosition.x, enemyPosition.y);
-      mSingleColorProgram.setUniforms(mModelProjectionMatrix, 0f, 0f, 1f);
+      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[ANGRY], i);
       enemy.draw();
-    }
+    }/*
+    glDisable(GL_BLEND);*/
   }
 
   private void positionObjectInScene(float x, float y) {
