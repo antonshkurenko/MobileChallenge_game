@@ -10,6 +10,7 @@ import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.ui.ChipView;
 import com.mobilechallenge.game.ui.DeckView;
 import com.mobilechallenge.game.ui.EnemyView;
+import com.mobilechallenge.game.utils.Geometry;
 import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -47,7 +48,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private ChipView mChipView;
   private EnemyView mEnemyView;
 
-  private float mInterpolation;
+  private float mInterpolation = 0f;
 
   public GameRenderer(Context ctx, GameState gameState) {
     mContext = ctx;
@@ -94,10 +95,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     mDeckView.draw();
 
     final ChipObject chip = mGameState.getChipObject();
+    final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
 
     mSingleColorProgram.useProgram();
     mChipView.bindData(mSingleColorProgram);
-    positionObjectInScene(chip.getPosition().x, chip.getPosition().y);
+    positionObjectInScene(chipPosition.x, chipPosition.y);
     mSingleColorProgram.setUniforms(mModelProjectionMatrix, 1f, 0f, 0f);
     chip.draw();
 
@@ -105,7 +107,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     mEnemyView.bindData(mSingleColorProgram);
     for (EnemyObject enemy : enemies) {
-      positionObjectInScene(enemy.getPosition().x, enemy.getPosition().y);
+      final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
+      positionObjectInScene(enemyPosition.x, enemyPosition.y);
       mSingleColorProgram.setUniforms(mModelProjectionMatrix, 0f, 0f, 1f);
       enemy.draw();
     }

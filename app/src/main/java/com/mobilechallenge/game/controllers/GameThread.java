@@ -12,7 +12,7 @@ import com.mobilechallenge.game.views.GameGlSurfaceView;
  */
 public class GameThread extends Thread {
 
-  private static final int TICKS_PER_SECOND = 25;
+  private static final int TICKS_PER_SECOND = 60;
   private static final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
   private static final int MAX_FRAMESKIP = 5;
 

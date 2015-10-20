@@ -30,6 +30,10 @@ public abstract class AbstractMovableObject extends BaseObject implements Movabl
     mPosition = mPosition.translate(mVector);
   }
 
+  @Override public Geometry.Point getInterpolatedPosition(float interpolation) {
+    return mPosition.translate(mVector.scale(interpolation));
+  }
+
   @Override public void stop() {
     mVector = new Geometry.Vector(0f, 0f, 0f);
   }
