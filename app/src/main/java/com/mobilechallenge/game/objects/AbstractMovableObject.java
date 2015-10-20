@@ -13,7 +13,12 @@ public abstract class AbstractMovableObject extends BaseObject implements Movabl
   protected Geometry.Point mPosition;
   protected Geometry.Vector mVector; // speed
 
-  public AbstractMovableObject(BinderDrawable image, Geometry.Point startPosition,
+  public AbstractMovableObject(Geometry.Point startPosition,
+      Geometry.Vector startSpeedVector) {
+    this(null, startPosition, startSpeedVector);
+  }
+
+  public AbstractMovableObject(Drawable image, Geometry.Point startPosition,
       Geometry.Vector startSpeedVector) {
     super(image);
 

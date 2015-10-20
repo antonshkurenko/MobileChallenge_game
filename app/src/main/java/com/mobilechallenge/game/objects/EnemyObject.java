@@ -1,6 +1,5 @@
 package com.mobilechallenge.game.objects;
 
-import com.mobilechallenge.game.ui.EnemyView;
 import com.mobilechallenge.game.utils.Geometry;
 
 /**
@@ -10,15 +9,14 @@ import com.mobilechallenge.game.utils.Geometry;
  */
 public class EnemyObject extends AbstractMovableObject {
 
-  private final float mRadius;
+  public static float RADIUS = 0.075f;
 
-  public EnemyObject(EnemyView image, Geometry.Point startPosition,
-      Geometry.Vector startSpeedVector) {
-    super(image, startPosition, startSpeedVector);
-    mRadius = image.radius;
+  public EnemyObject(Geometry.Point startPosition, Geometry.Vector startSpeedVector) {
+    super(startPosition, startSpeedVector);
   }
 
-  public float getRadius() {
-    return mRadius;
+  public EnemyObject(Drawable image, Geometry.Point startPosition,
+      Geometry.Vector startSpeedVector) {
+    super(image, startPosition, startSpeedVector);
   }
 }

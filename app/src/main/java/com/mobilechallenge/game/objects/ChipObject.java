@@ -1,6 +1,5 @@
 package com.mobilechallenge.game.objects;
 
-import com.mobilechallenge.game.ui.ChipView;
 import com.mobilechallenge.game.utils.Geometry;
 
 /**
@@ -10,15 +9,18 @@ import com.mobilechallenge.game.utils.Geometry;
  */
 public class ChipObject extends AbstractMovableObject {
 
-  private final float mRadius;
+  public static float RADIUS = 0.15f;
 
-  public ChipObject(ChipView image, Geometry.Point startPosition,
-      Geometry.Vector startSpeedVector) {
-    super(image, startPosition, startSpeedVector);
-    mRadius = image.radius;
+  public ChipObject(Geometry.Point startPosition, Geometry.Vector startSpeedVector) {
+    super(startPosition, startSpeedVector);
   }
 
-  public float getRadius() {
-    return mRadius;
+  public ChipObject(Drawable image, Geometry.Point startPosition,
+      Geometry.Vector startSpeedVector) {
+    super(image, startPosition, startSpeedVector);
+  }
+
+  @Override public void setImage(Drawable image) {
+    super.setImage(image);
   }
 }
