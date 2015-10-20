@@ -5,7 +5,6 @@ import com.mobilechallenge.game.objects.EnemyObject;
 import com.mobilechallenge.game.programs.DefaultTextureProgram;
 import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.utils.Geometry;
-import com.mobilechallenge.game.utils.TextureHelper;
 import com.mobilechallenge.game.utils.VertexArray;
 import java.util.List;
 
@@ -36,8 +35,7 @@ public class EnemyView implements Drawable {
             aspectRatio);
 
     mVertexArray = new VertexArray(generatedData.mVertexData);
-    mTextureVertexArray =
-        new VertexArray(TextureHelper.getTextureVertices(generatedData.mVertexData));
+    mTextureVertexArray = new VertexArray(generatedData.mTextureData);
     mDrawList = generatedData.mDrawableList;
   }
 
@@ -64,7 +62,7 @@ public class EnemyView implements Drawable {
     mVertexArray.setVertexAttribPointer(0, program.getPositionAttributeLocation(),
         POSITION_COMPONENT_COUNT, 0);
 
-    mTextureVertexArray.setVertexAttribPointer(POSITION_COMPONENT_COUNT,
-        program.getTextureCoordinatesAttributeLocation(), TEXTURE_COORDINATES_COMPONENT_COUNT, 0);
+    mTextureVertexArray.setVertexAttribPointer(0, program.getTextureCoordinatesAttributeLocation(),
+        TEXTURE_COORDINATES_COMPONENT_COUNT, 0);
   }
 }

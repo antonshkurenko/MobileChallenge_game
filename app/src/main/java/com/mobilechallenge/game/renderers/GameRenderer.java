@@ -82,10 +82,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     mDeckView = new DeckView(); // since it doesn't need aspect ratio, it's initialized here
 
     mTextures = TextureHelper.loadTextures(mContext, R.drawable.texture_angry_256_256,
-        R.drawable.texture_very_angry_256_256, R.drawable.texture_sad_512_512,
-        /*R.drawable.texture_smile_512_512*/ R.drawable.texture_test_256_256);
-
-    //mTempTexture = TextureHelper.loadTexture(mContext, R.drawable.texture_test_256_256);
+        R.drawable.texture_very_angry_256_256, R.drawable.texture_sad_256_256,
+        R.drawable.texture_smile_256_256);
   }
 
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -134,7 +132,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
       final EnemyObject enemy = enemies.get(i);
       final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
       positionObjectInScene(enemyPosition.x, enemyPosition.y);
-      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[ANGRY], i);
+      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[VERY_ANGRY], i);
       enemy.draw();
     }/*
     glDisable(GL_BLEND);*/

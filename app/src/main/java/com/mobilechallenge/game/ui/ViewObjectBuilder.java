@@ -18,6 +18,7 @@ public class ViewObjectBuilder {
   private static final int FLOATS_PER_VERTEX = 2; // X, Y, R, G, B
 
   private final float[] mVertexData;
+  private final float[] mTextureData;
   private final List<Drawable> mDrawList = new ArrayList<>();
   private int mOffset = 0;
 
@@ -50,6 +51,7 @@ public class ViewObjectBuilder {
 
   private ViewObjectBuilder(int sizeInVertices) {
     mVertexData = new float[sizeInVertices * FLOATS_PER_VERTEX];
+    mTextureData = new float[sizeInVertices * FLOATS_PER_VERTEX];
   }
 
   private ViewObjectBuilder appendCircle(Geometry.Circle circle, int numPoints, float aspectRatio) {
@@ -57,16 +59,27 @@ public class ViewObjectBuilder {
     final int startVertex = mOffset / FLOATS_PER_VERTEX;
     final int numVertices = sizeOfCircleInVertices(numPoints);
 
-    mVertexData[mOffset++] = circle.center.x;
-    mVertexData[mOffset++] = circle.center.y;
+    mVertexData[mOffset] = circle.center.x / aspectRatio;
+    mTextureData[mOffset++] = (circle.center.x + 1f) * 0.5f;
+    mVertexData[mOffset] = circle.center.y;
+    mTextureData[mOffset++] = (circle.center.y + 1f) * 0.5f * -1;
 
     for (int i = 0; i <= numPoints; i++) {
       float angleInRadians = ((float) i / (float) numPoints) * ((float) Math.PI * 2f);
 
-      mVertexData[mOffset++] =
-          circle.center.x + circle.radius * (float) Math.cos(angleInRadians) / aspectRatio;
+      final float c = (float) Math.cos(angleInRadians);
+      final float s = (float) Math.sin(angleInRadians);
 
-      mVertexData[mOffset++] = circle.center.y + circle.radius * (float) Math.sin(angleInRadians);
+      mVertexData[mOffset] =
+          circle.center.x + circle.radius * c / aspectRatio;
+
+      mTextureData[mOffset++] =
+          (c + 1f) * 0.5f;
+
+      mVertexData[mOffset] = circle.center.y + circle.radius * s;
+
+      mTextureData[mOffset++] =
+          (s + 1f) * 0.5f * -1;
     }
 
     mDrawList.add(() -> glDrawArrays(GL_TRIANGLE_FAN, startVertex, numVertices));
@@ -74,15 +87,17 @@ public class ViewObjectBuilder {
   }
 
   private GeneratedData build() {
-    return new GeneratedData(mVertexData, mDrawList);
+    return new GeneratedData(mVertexData, mTextureData, mDrawList);
   }
 
   static class GeneratedData {
     final float[] mVertexData;
+    final float[] mTextureData;
     final List<Drawable> mDrawableList;
 
-    GeneratedData(float[] vertexData, List<Drawable> drawableList) {
+    GeneratedData(float[] vertexData, float[] textureData, List<Drawable> drawableList) {
       this.mVertexData = vertexData;
+      this.mTextureData = textureData;
       this.mDrawableList = drawableList;
     }
   }
