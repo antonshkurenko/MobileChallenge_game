@@ -101,6 +101,10 @@ public class Geometry {
       return new Vector(x * f, y * f, z * f);
     }
 
+    public Vector add(Vector other) {
+      return new Vector(x + other.x, y + other.y, z + other.z);
+    }
+
     public Vector rotateRandom(Random r) {
 
       double angle = r.nextFloat() * 2 * Math.PI;

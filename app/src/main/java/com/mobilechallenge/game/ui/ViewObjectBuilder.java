@@ -1,5 +1,6 @@
-package com.mobilechallenge.game.objects;
+package com.mobilechallenge.game.ui;
 
+import com.mobilechallenge.game.objects.Drawable;
 import com.mobilechallenge.game.utils.Geometry;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import static android.opengl.GLES20.glDrawArrays;
  * Date: 10/18/15
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
-public class ObjectBuilder {
+public class ViewObjectBuilder {
 
   private static final int FLOATS_PER_VERTEX = 2; // X, Y, R, G, B
 
@@ -28,7 +29,7 @@ public class ObjectBuilder {
 
     Geometry.Circle circle = new Geometry.Circle(center, radius);
 
-    return new ObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
+    return new ViewObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
   }
 
   // creating image of the enemy
@@ -40,18 +41,18 @@ public class ObjectBuilder {
     // visible top
     Geometry.Circle circle = new Geometry.Circle(center, radius);
 
-    return new ObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
+    return new ViewObjectBuilder(size).appendCircle(circle, numPoints, aspectRatio).build();
   }
 
   private static int sizeOfCircleInVertices(int numPoints) {
     return 1 + (numPoints + 1);
   }
 
-  private ObjectBuilder(int sizeInVertices) {
+  private ViewObjectBuilder(int sizeInVertices) {
     mVertexData = new float[sizeInVertices * FLOATS_PER_VERTEX];
   }
 
-  private ObjectBuilder appendCircle(Geometry.Circle circle, int numPoints, float aspectRatio) {
+  private ViewObjectBuilder appendCircle(Geometry.Circle circle, int numPoints, float aspectRatio) {
 
     final int startVertex = mOffset / FLOATS_PER_VERTEX;
     final int numVertices = sizeOfCircleInVertices(numPoints);

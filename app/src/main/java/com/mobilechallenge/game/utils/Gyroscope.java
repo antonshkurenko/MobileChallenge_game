@@ -22,11 +22,9 @@ public class Gyroscope implements SensorEventListener {
   private Display mDisplay;
 
   // @formatter:off
-      private float[] mAccelGravityData = new float[3];
-     private float[  ] mSensorX = new float[10];
-    private float[    ] mSensorY = new float[10];
-   private float[      ] mBufferedAccelGData = new float[3];
-      private float[] mOrientationArray = new float[2];
+     private float[] mSensorX = new float[10];
+    private float[  ] mSensorY = new float[10];
+   private float[    ] mOrientationArray = new float[2];
   // @formatter:on
 
   public Gyroscope(Context context) {

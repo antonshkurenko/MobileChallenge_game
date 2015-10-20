@@ -10,7 +10,7 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.mobilechallenge.game.R;
-import com.mobilechallenge.game.renderers.AnotherOneRenderer;
+import com.mobilechallenge.game.renderers.GameRenderer;
 import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 
@@ -59,7 +59,7 @@ public class GameActivity extends AppCompatActivity {
         (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
     final boolean supportEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
-    final GLSurfaceView.Renderer renderer = new AnotherOneRenderer(this, mGyroscope);
+    final GLSurfaceView.Renderer renderer = new GameRenderer(this, mGyroscope);
 
     if (supportEs2) {
       //Request an Open ES 2.0 compatible context.
