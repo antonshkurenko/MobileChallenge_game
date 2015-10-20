@@ -31,6 +31,8 @@ public class GameState {
 
   private float mAspectRatio;
 
+  private boolean mIsInited = false;
+
   public GameState(Gyroscope gyroscope) {
 
     mRandom = new Random();
@@ -48,7 +50,7 @@ public class GameState {
   }
 
   public GameState setEnemyView(Drawable enemy) {
-    for(EnemyObject e : mEnemyObjects) {
+    for (EnemyObject e : mEnemyObjects) {
       e.setImage(enemy);
     }
     return this;
@@ -85,9 +87,15 @@ public class GameState {
         new EnemyObject(new Geometry.Point(leftX, topY), new Geometry.Vector(0.002f, -0.002f)));
     mEnemyObjects.add(
         new EnemyObject(new Geometry.Point(leftX, bottomY), new Geometry.Vector(0.002f, 0.002f)));
+
+    mIsInited = true;
   }
 
-  public void step() {
+  public synchronized void step() {
+
+    if (!mIsInited) {
+      return;
+    }
 
     final float[] orientation = mGyroscope.getOrientationArray(); // 0 x, 1 y
 

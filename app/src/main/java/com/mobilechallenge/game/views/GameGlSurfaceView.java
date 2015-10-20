@@ -18,4 +18,8 @@ public class GameGlSurfaceView extends GLSurfaceView {
   public GameGlSurfaceView(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
+
+  public void draw(float interpolation) {
+    
+  }
 }

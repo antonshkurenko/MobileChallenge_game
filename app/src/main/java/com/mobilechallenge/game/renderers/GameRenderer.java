@@ -10,7 +10,6 @@ import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.ui.ChipView;
 import com.mobilechallenge.game.ui.DeckView;
 import com.mobilechallenge.game.ui.EnemyView;
-import com.mobilechallenge.game.utils.Gyroscope;
 import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -38,7 +37,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private final float[    ] mModelProjectionMatrix = new float[16];
   // @formatter:on
   private final Context mContext;
-  private float mAspectRatio; // w/h
   private SimpleVaryingColorShaderProgram mVaryingColorProgram;
   private SimpleSingleColorShaderProgram mSingleColorProgram;
 
@@ -49,10 +47,16 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private ChipView mChipView;
   private EnemyView mEnemyView;
 
-  public GameRenderer(Context ctx, Gyroscope gyroscope) {
+  private float mInterpolation;
+
+  public GameRenderer(Context ctx, GameState gameState) {
     mContext = ctx;
 
-    mGameState = new GameState(gyroscope);
+    mGameState = gameState;
+  }
+
+  public void setInterpolation(float interpolation) {
+    mInterpolation = interpolation;
   }
 
   @Override public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -67,14 +71,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     glViewport(0, 0, width, height);
 
     // currently it's width / height
-    mAspectRatio = (float) width / (float) height;
+    final float aspectRatio = (float) width / (float) height;
 
-    Timber.i("Width is %d, height is %d, aspect is %f", width, height, mAspectRatio);
+    Timber.i("Width is %d, height is %d, aspect is %f", width, height, aspectRatio);
 
-    mChipView = new ChipView(32, mAspectRatio);
-    mEnemyView = new EnemyView(32, mAspectRatio);
+    mChipView = new ChipView(32, aspectRatio);
+    mEnemyView = new EnemyView(32, aspectRatio);
 
-    mGameState.initGame(mAspectRatio);
+    mGameState.initGame(aspectRatio);
     mGameState.setChipView(mChipView).setEnemyView(mEnemyView);
 
     // use aspect ratio not here, but later
@@ -83,8 +87,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
   @Override public void onDrawFrame(GL10 gl) {
     glClear(GL_COLOR_BUFFER_BIT);
-
-    mGameState.step();
 
     mVaryingColorProgram.useProgram();
     mDeckView.bindData(mVaryingColorProgram);
