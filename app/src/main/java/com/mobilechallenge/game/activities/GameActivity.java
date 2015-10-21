@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,9 @@ public class GameActivity extends AppCompatActivity
   @Bind(R.id.timer) TextView mTimerText;
   @Bind(R.id.difficulty_level_bar) SeekBar mDifficultyBar;
   @Bind(R.id.difficulty_text) TextView mDifficultyText;
+  @Bind(R.id.score_label) TextView mScoreLabel;
+  @Bind(R.id.score) TextView mScore;
+  @Bind(R.id.score_layout) LinearLayout mScoreLayout;
 
   @BindString(R.string.start) String mStartString;
   @BindString(R.string.resume) String mResumeString;
@@ -46,12 +50,32 @@ public class GameActivity extends AppCompatActivity
 
   private boolean mRenderSet = false;
 
-  @OnClick({ R.id.gl_surface, R.id.start_button }) void toggleState() {
+  private boolean mScoreOpened = false;
+
+  @OnClick(R.id.gl_surface) void toggleState() {
+    if (mScoreOpened) {
+      closeScore();
+      return;
+    }
+
+    resumePause();
+  }
+
+  @OnClick(R.id.start_button) void resumePause() {
     if (mStart.getVisibility() == View.VISIBLE) {
       resume();
     } else {
       pause();
     }
+  }
+
+  @OnClick(R.id.score_layout) void closeScore() {
+    mScoreLayout.setVisibility(View.GONE);
+    mStart.setText(mStartString);
+    mStart.setVisibility(View.VISIBLE);
+    mDifficultyBar.setVisibility(View.VISIBLE);
+    mDifficultyText.setVisibility(View.VISIBLE);
+    mScoreOpened = false;
   }
 
   @Override public void onStartGame() {
@@ -67,12 +91,11 @@ public class GameActivity extends AppCompatActivity
   }
 
   @Override public void onLostGame(String finalTime) {
+
+    mScoreOpened = true;
     runOnUiThread(() -> {
-      mStart.setText(mStartString);
-      mStart.setVisibility(View.VISIBLE);
-      mDifficultyBar.setVisibility(View.VISIBLE);
-      mDifficultyText.setVisibility(View.VISIBLE);
-      mTimerText.setText(finalTime);
+      mScore.setText(finalTime);
+      mScoreLayout.setVisibility(View.VISIBLE);
     });
 
     Timber.d("Lost with result %s.", finalTime);
@@ -107,6 +130,9 @@ public class GameActivity extends AppCompatActivity
     final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
     mStart.setTypeface(typeface);
     mDifficultyText.setTypeface(typeface);
+    mTimerText.setTypeface(typeface);
+    mScoreLabel.setTypeface(typeface);
+    mScore.setTypeface(typeface);
     mDifficultyBar.setOnSeekBarChangeListener(this);
 
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -142,6 +168,11 @@ public class GameActivity extends AppCompatActivity
     if (mRenderSet) {
       mGlSurfaceView.onPause();
     }
+
+    if(mScoreOpened) {
+      closeScore();
+    }
+
     pause();
     super.onPause();
   }

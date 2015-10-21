@@ -15,16 +15,17 @@
 
   <Button
       android:id="@+id/start_button"
-      android:background="@null"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textSize="@dimen/text_size_super_giant"
-      android:textAllCaps="true"
-      android:textColor="@android:color/black"
       android:text="@string/start"
       android:layout_centerInParent="true"
-      android:enabled="false"
-      />
+      style="@style/GameTextViews"/>
+
+  <include layout="@layout/end_game_layout"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerInParent="true"/>
 
   <TextView
       android:id="@+id/timer"
@@ -35,7 +36,9 @@
       android:textSize="@dimen/text_size_medium"
       android:layout_alignParentRight="true"
       android:layout_alignParentEnd="true"
-      android:layout_margin="10dp"
+      android:layout_marginTop="15dp"
+      android:layout_marginRight="25dp"
+      android:layout_marginEnd="25dp"
       android:textColor="@android:color/black"/>
 
   <SeekBar

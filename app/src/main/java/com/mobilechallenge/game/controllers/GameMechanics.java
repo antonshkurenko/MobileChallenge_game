@@ -24,6 +24,7 @@ import timber.log.Timber;
  * Date: 10/20/15
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
+// fixme(me), 10/21/15: check why right and left sides are not on the screen side
 public class GameMechanics {
 
   public static final String PREFS_IS_SAVED = "hey_i_just_met_you";
@@ -228,7 +229,7 @@ public class GameMechanics {
 
       enemy.move();
 
-      if (i == 0) {
+      if (i == 0 && mMaxSpeed > 0.0f) {
         Timber.d("Speed is %f, max speed is %f.", enemy.getSpeed().length(), mMaxSpeed);
       }
       if (enemy.getSpeed().length() <= mMaxSpeed) {

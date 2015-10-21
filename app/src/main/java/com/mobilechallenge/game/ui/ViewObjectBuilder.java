@@ -15,7 +15,7 @@ import static android.opengl.GLES20.glDrawArrays;
  */
 public class ViewObjectBuilder {
 
-  private static final int FLOATS_PER_VERTEX = 2; // X, Y, R, G, B
+  private static final int FLOATS_PER_VERTEX = 2; // X, Y
 
   private final float[] mVertexData;
   private final float[] mTextureData;

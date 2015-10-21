@@ -25,11 +25,11 @@ public class DeckView implements Drawable {
       // Order of coordinates: X, Y, R, G, B
       // Triangle Fan
       0f, 0f, 1f, 1f, 1f,
-      -1f, -1f, 0.7f, 0.7f, 0.7f,
-      1f, -1f, 0.7f, 0.7f, 0.7f,
-      1f, 1f, 0.7f, 0.7f, 0.7f,
-      -1f, 1f, 0.7f, 0.7f, 0.7f,
-      -1f, -1f, 0.7f, 0.7f, 0.7f,
+      -0.95f, -1f, 0.7f, 0.7f, 0.7f,
+      0.95f, -1f, 0.7f, 0.7f, 0.7f,
+      0.95f, 1f, 0.7f, 0.7f, 0.7f,
+      -0.95f, 1f, 0.7f, 0.7f, 0.7f,
+      -0.95f, -1f, 0.7f, 0.7f, 0.7f,
   };
   // @formatter:on
 
