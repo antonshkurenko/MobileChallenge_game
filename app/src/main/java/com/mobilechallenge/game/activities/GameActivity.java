@@ -38,17 +38,24 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
 
   private boolean mRenderSet = false;
 
-  @OnClick(R.id.start_button) void onClick(Button b) {
-    b.setVisibility(View.GONE);
+  @OnClick(R.id.gl_surface) void onGlTouch() {
 
-    if (mRenderSet) {
-      if (mGameThread.isRunning()) {
-        mGameThread.setIsRunning(false);
+    if (mGameThread.isRunning()) {
+      mGameThread.setIsRunning(false);
+    }
+
+    if (mStart.getVisibility() == View.VISIBLE) {
+
+      mStart.setVisibility(View.GONE);
+      if (mRenderSet) {
+        mGameThread = getNewThread(false);
+        mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
+        mGlSurfaceView.onResume();
+        mGameThread.start();
       }
-      mGameThread = getNewThread(false);
-      mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
-      mGlSurfaceView.onResume();
-      mGameThread.start();
+    } else {
+      mStart.setText(mResumeString);
+      mStart.setVisibility(View.VISIBLE);
     }
   }
 
@@ -62,7 +69,6 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
     mGlSurfaceView.onResume();
     mGameThread.start();
-
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {
