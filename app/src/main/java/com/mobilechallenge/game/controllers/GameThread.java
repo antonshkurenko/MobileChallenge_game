@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import com.mobilechallenge.game.renderers.GameRenderer;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
+import timber.log.Timber;
 
 /**
  * Project: Game
@@ -40,23 +41,34 @@ public class GameThread extends Thread {
 
     long nextGameTick = System.currentTimeMillis(); // start time
     int loops;
-    float interpolation;
 
+    gameCycle:
     while (mIsRunning) {
 
       loops = 0;
       while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
 
-        mGameState.step();
+        if (!mGameState.step()) {
+          mIsRunning = false;
+          countInterpolation(nextGameTick);
+          mView.requestRender();
+          break gameCycle; // You lost
+        }
         nextGameTick += SKIP_TICKS;
         loops++;
       }
 
-      interpolation =
-          (float) (System.currentTimeMillis() + SKIP_TICKS - nextGameTick) / (float) SKIP_TICKS;
-
-      mRenderer.setInterpolation(interpolation);
+      countInterpolation(nextGameTick);
       mView.requestRender();
     }
+
+    Timber.d("You lost");
+  }
+
+  private void countInterpolation(long nextGameTick) {
+    final float interpolation =
+        (float) (System.currentTimeMillis() + SKIP_TICKS - nextGameTick) / (float) SKIP_TICKS;
+
+    mRenderer.setInterpolation(interpolation);
   }
 }

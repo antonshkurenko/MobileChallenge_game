@@ -9,6 +9,29 @@ import java.util.Random;
  */
 public class Geometry {
 
+  public static boolean intersects(Sphere sphere, Ray ray) {
+    return distanceBetween(sphere.center, ray) < sphere.radius;
+  }
+
+  private static float distanceBetween(Point center, Ray ray) {
+    Vector p1ToPoint = new Vector(ray.point, center);
+    Vector p2ToPoint = new Vector(ray.point.translate(ray.vector), center);
+
+    float areaOfTriangleTimesTwo = p1ToPoint.crossProduct(p2ToPoint).length();
+    float lengthOfBase = ray.vector.length();
+
+    return areaOfTriangleTimesTwo / lengthOfBase;
+  }
+
+  public static Point intersectionPoint(Ray ray, Plane plane) {
+    Vector rayToPlaneVector = new Vector(ray.point, plane.point);
+
+    float scaleFactor =
+        rayToPlaneVector.dotProduct(plane.normal) / ray.vector.dotProduct(plane.normal);
+
+    return ray.point.translate(ray.vector.scale(scaleFactor));
+  }
+
   public static class Point {
     public final float x, y, z;
 
@@ -31,6 +54,10 @@ public class Geometry {
     public Point translate(Vector vector) {
       return new Point(x + vector.x, y + vector.y, z + vector.z);
     }
+
+    public float distanceTo(Point to) {
+      return new Vector(this, to).length();
+    }
   }
 
   public static class Circle {
@@ -44,6 +71,14 @@ public class Geometry {
 
     public Circle scale(float scale) {
       return new Circle(center, radius * scale);
+    }
+
+    public boolean intersects(Circle with) {
+      return center.distanceTo(with.center) <= radius + with.radius;
+    }
+
+    public boolean softIntersects(Circle with) {
+      return center.distanceTo(with.center) <= (radius + with.radius) * 0.77f;
     }
   }
 
@@ -84,6 +119,12 @@ public class Geometry {
       this.z = z;
     }
 
+    public Vector(Point from, Point to) {
+      x = to.x - from.x;
+      y = to.y - from.y;
+      z = to.z - from.z;
+    }
+
     public float length() {
       return (float) Math.sqrt(x * x + y * y + z * z);
     }
@@ -109,15 +150,9 @@ public class Geometry {
 
       double angle = r.nextFloat() * 2 * Math.PI;
 
-      return new Vector(
-        x * (float) Math.cos(angle) - y * (float) Math.sin(angle),
-          x * (float) Math.sin(angle) + y * (float) Math.cos(angle)
-      );
+      return new Vector(x * (float) Math.cos(angle) - y * (float) Math.sin(angle),
+          x * (float) Math.sin(angle) + y * (float) Math.cos(angle));
     }
-  }
-
-  public static Vector vectorBetween(Point from, Point to) {
-    return new Vector(to.x - from.x, to.y - from.y, to.z - from.z);
   }
 
   public static class Sphere {
@@ -130,20 +165,6 @@ public class Geometry {
     }
   }
 
-  public static boolean intersects(Sphere sphere, Ray ray) {
-    return distanceBetween(sphere.center, ray) < sphere.radius;
-  }
-
-  private static float distanceBetween(Point center, Ray ray) {
-    Vector p1ToPoint = vectorBetween(ray.point, center);
-    Vector p2ToPoint = vectorBetween(ray.point.translate(ray.vector), center);
-
-    float areaOfTriangleTimesTwo = p1ToPoint.crossProduct(p2ToPoint).length();
-    float lengthOfBase = ray.vector.length();
-
-    return areaOfTriangleTimesTwo / lengthOfBase;
-  }
-
   public static class Plane {
     public final Point point;
     public final Vector normal;
@@ -152,14 +173,5 @@ public class Geometry {
       this.point = point;
       this.normal = normal;
     }
-  }
-
-  public static Point intersectionPoint(Ray ray, Plane plane) {
-    Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
-
-    float scaleFactor =
-        rayToPlaneVector.dotProduct(plane.normal) / ray.vector.dotProduct(plane.normal);
-
-    return ray.point.translate(ray.vector.scale(scaleFactor));
   }
 }

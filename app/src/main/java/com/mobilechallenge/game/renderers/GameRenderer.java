@@ -115,10 +115,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     final ChipObject chip = mGameState.getChipObject();
     final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
 
-
-    /*glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
-
+    // todo(me), 10/20/15: add color gradient to faces:
+    /**
+     * if p <= 1.0
+     * colorT = colorA * p + colorB * (1.0 - p);
+     * else
+     * colorT = colorB * (p - 1.0) + colorC * (2.0 - p);
+     */
     mTextureProgram.useProgram();
     mChipView.bindData(mTextureProgram);
     positionObjectInScene(chipPosition.x, chipPosition.y);
@@ -134,8 +137,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
       positionObjectInScene(enemyPosition.x, enemyPosition.y);
       mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[VERY_ANGRY], i);
       enemy.draw();
-    }/*
-    glDisable(GL_BLEND);*/
+    }
   }
 
   private void positionObjectInScene(float x, float y) {

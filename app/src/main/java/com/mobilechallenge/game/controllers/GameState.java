@@ -67,8 +67,6 @@ public class GameState {
   public void initGame(float aspectRatio) {
     mAspectRatio = aspectRatio;
 
-    mAspectRatio = aspectRatio;
-
     mChipObject = new ChipObject(new Geometry.Point(0f, 0f, 0f), new Geometry.Vector(0f, 0f, 0f));
     mEnemyObjects = new ArrayList<>();
 
@@ -91,10 +89,10 @@ public class GameState {
     mIsInited = true;
   }
 
-  public synchronized void step() {
+  public synchronized boolean step() {
 
     if (!mIsInited) {
-      return;
+      return true; // skip step
     }
 
     final float[] orientation = mGyroscope.getOrientationArray(); // 0 x, 1 y
@@ -103,14 +101,14 @@ public class GameState {
     mChipObject.move();
 
     final Geometry.Point chipPosition = mChipObject.getPosition();
+    final Geometry.Circle chipCircle = new Geometry.Circle(chipPosition, ChipObject.RADIUS);
 
+    // if touch any side
     if (chipPosition.x < LEFT_BOUND + ChipObject.RADIUS / mAspectRatio
-        || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio) {
-      mChipObject.stop();
-    }
-    if (chipPosition.y > TOP_BOUND - ChipObject.RADIUS
+        || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio
+        || chipPosition.y > TOP_BOUND - ChipObject.RADIUS
         || chipPosition.y < BOTTOM_BOUND + ChipObject.RADIUS) {
-      mChipObject.stop();
+      return false; // lose
     }
 
     mChipObject.setPosition(new Geometry.Point(
@@ -121,16 +119,16 @@ public class GameState {
     for (int i = 0; i < 4; i++) {
 
       final EnemyObject enemy = mEnemyObjects.get(i);
+
       enemy.move();
       enemy.scaleSpeed(1.002f);
 
       final Geometry.Point position = enemy.getPosition();
 
+      // if touch any side
       if (position.x < LEFT_BOUND + EnemyObject.RADIUS / mAspectRatio
-          || position.x > RIGHT_BOUND - EnemyObject.RADIUS / mAspectRatio) {
-        enemy.rotateRandom(mRandom);
-      }
-      if (position.y > TOP_BOUND - EnemyObject.RADIUS
+          || position.x > RIGHT_BOUND - EnemyObject.RADIUS / mAspectRatio
+          || position.y > TOP_BOUND - EnemyObject.RADIUS
           || position.y < BOTTOM_BOUND + EnemyObject.RADIUS) {
         enemy.rotateRandom(mRandom);
       }
@@ -139,7 +137,13 @@ public class GameState {
           clamp(position.x, LEFT_BOUND + EnemyObject.RADIUS / mAspectRatio,
               RIGHT_BOUND - EnemyObject.RADIUS / mAspectRatio),
           clamp(position.y, BOTTOM_BOUND + EnemyObject.RADIUS, TOP_BOUND - EnemyObject.RADIUS)));
+
+      final Geometry.Circle enemyCircle = new Geometry.Circle(position, EnemyObject.RADIUS);
+      if (enemyCircle.softIntersects(chipCircle)) {
+        return false; // you lost
+      }
     }
+    return true;
   }
 
   /**

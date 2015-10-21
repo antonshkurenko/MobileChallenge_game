@@ -9,7 +9,7 @@ import com.mobilechallenge.game.utils.Geometry;
  */
 public class ChipObject extends AbstractMovableObject {
 
-  public static float RADIUS = 0.25f;
+  public static float RADIUS = 0.1f;
 
   public ChipObject(Geometry.Point startPosition, Geometry.Vector startSpeedVector) {
     super(startPosition, startSpeedVector);
