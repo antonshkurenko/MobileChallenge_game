@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.BindString;
@@ -24,10 +25,11 @@ import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 import timber.log.Timber;
 
-public class GameActivity extends AppCompatActivity implements GameThread.LostCallback {
+public class GameActivity extends AppCompatActivity implements GameThread.EventsCallback {
 
   @Bind(R.id.gl_surface) GameGlSurfaceView mGlSurfaceView;
   @Bind(R.id.start_button) Button mStart;
+  @Bind(R.id.timer) TextView mTimerText;
 
   @BindString(R.string.start) String mStartString;
   @BindString(R.string.resume) String mResumeString;
@@ -48,15 +50,35 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     }
   }
 
-  @Override public void onLost() {
+  @Override public void onStartGame() {
+    if (!mGameThread.isPreview()) {
+      runOnUiThread(() -> mTimerText.setVisibility(View.VISIBLE));
+    }
+  }
+
+  @Override public void onUpdate(String time) {
+    if(!mGameThread.isPreview()) {
+      runOnUiThread(() -> mTimerText.setText(time));
+    }
+  }
+
+  @Override public void onLostGame(String finalTime) {
     runOnUiThread(() -> {
       mStart.setText(mStartString);
       mStart.setVisibility(View.VISIBLE);
+      mTimerText.setText(finalTime);
     });
 
+    Timber.d("Lost with result %s.", finalTime);
     mGameThread = getNewThread(true);
     mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
     mGameThread.start();
+  }
+
+  @Override public void onEndGame() {
+    if(mGameThread.isPreview()) {
+      runOnUiThread(() -> mTimerText.setVisibility(View.GONE));
+    }
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {

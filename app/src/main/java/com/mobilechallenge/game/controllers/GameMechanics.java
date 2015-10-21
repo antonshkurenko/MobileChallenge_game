@@ -48,6 +48,7 @@ public class GameMechanics {
   private float mMaxSpeed;
   private float mMultiplierSpeed;
   private int mDifficultyLevel = GameParams.LEVEL_PREVIEW;
+  private long mTimePassed;
 
   private float mAspectRatio = 1f;
 
@@ -60,6 +61,10 @@ public class GameMechanics {
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
   }
 
+  /**
+   * Setters
+   */
+
   public GameMechanics setGameLevel(int level) {
     mDifficultyLevel = level;
     return this;
@@ -68,6 +73,11 @@ public class GameMechanics {
   public GameMechanics setAspectRatio(float aspectRatio) {
     Timber.i("Aspect ratio from setter is %f.", aspectRatio);
     mAspectRatio = aspectRatio;
+    return this;
+  }
+
+  public GameMechanics setTimePassed(long time) {
+    mTimePassed = time;
     return this;
   }
 
@@ -85,6 +95,12 @@ public class GameMechanics {
     return this;
   }
 
+  /*********************************************/
+
+  /**
+   * Getters
+   */
+
   public boolean isInited() {
     return mIsInited;
   }
@@ -96,6 +112,12 @@ public class GameMechanics {
   public synchronized List<EnemyObject> getEnemyObjects() {
     return mEnemyObjects;
   }
+
+  public long getTimePassed() {
+    return mTimePassed;
+  }
+
+  /*********************************************/
 
   public void initGame() {
     createGameFromParams(GameParams.level(mRandom, mDifficultyLevel, mAspectRatio));
@@ -122,7 +144,8 @@ public class GameMechanics {
         .setDifficultyLevel(mDifficultyLevel)
         .setMaxSpeed(mMaxSpeed)
         .setMultiplierSpeed(mMultiplierSpeed)
-        .setAspectRatio(mAspectRatio);
+        .setAspectRatio(mAspectRatio)
+        .setTimePassed(mTimePassed);
 
     final List<Geometry.Point> enemyPositions = new ArrayList<>();
     final List<Geometry.Vector> enemyVectors = new ArrayList<>();
@@ -161,6 +184,7 @@ public class GameMechanics {
     mStartEnemyVector = params.getStartEnemyVector();
     mDifficultyLevel = params.getDifficultyLevel();
     mAspectRatio = params.getAspectRatio();
+    mTimePassed = params.getTimePassed();
 
     mIsInited = true;
   }
@@ -272,6 +296,7 @@ public class GameMechanics {
     private float mMultiplierSpeed;
     private int mDifficultyLevel;
     private float mAspectRatio;
+    private long mTimePassed;
 
     /**
      * for Gson
@@ -287,7 +312,7 @@ public class GameMechanics {
     private GameParams(Geometry.Point chipPosition, Geometry.Vector chipSpeed,
         List<Geometry.Point> enemyPositions, List<Geometry.Vector> enemyVectors,
         Geometry.Vector startEnemyVector, float maxSpeed, float multiplierSpeed,
-        int difficultyLevel, float aspectRatio) {
+        int difficultyLevel, float aspectRatio, long timePassed) {
       this.mChipPosition = chipPosition;
       this.mChipSpeed = chipSpeed;
       this.mEnemyPositions = enemyPositions;
@@ -297,6 +322,7 @@ public class GameMechanics {
       this.mMultiplierSpeed = multiplierSpeed;
       this.mDifficultyLevel = difficultyLevel;
       this.mAspectRatio = aspectRatio;
+      this.mTimePassed = timePassed;
     }
 
     public static GameParams level(Random rnd, @DifficultyLevel int level, float aspectRatio) {
@@ -376,6 +402,10 @@ public class GameMechanics {
       return mAspectRatio;
     }
 
+    public long getTimePassed() {
+      return mTimePassed;
+    }
+
     /*****************************************/
 
     @IntDef({
@@ -396,6 +426,7 @@ public class GameMechanics {
       private float mMultiplierSpeed;
       private int mDifficultyLevel;
       private float mAspectRatio;
+      private long mTimePassed = 0l;
 
       public Builder setChipPosition(Geometry.Point chipPosition) {
         mChipPosition = chipPosition;
@@ -442,9 +473,15 @@ public class GameMechanics {
         return this;
       }
 
+      public Builder setTimePassed(long timePassed) {
+        mTimePassed = timePassed;
+        return this;
+      }
+
       public GameParams build() {
         return new GameParams(mChipPosition, mChipSpeed, mEnemyPositions, mEnemyVectors,
-            mStartEnemyVector, mMaxSpeed, mMultiplierSpeed, mDifficultyLevel, mAspectRatio);
+            mStartEnemyVector, mMaxSpeed, mMultiplierSpeed, mDifficultyLevel, mAspectRatio,
+            mTimePassed);
       }
     }
   }
