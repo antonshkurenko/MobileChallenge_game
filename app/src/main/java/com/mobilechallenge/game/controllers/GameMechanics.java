@@ -118,6 +118,14 @@ public class GameMechanics {
     return mTimePassed;
   }
 
+  public float getMaxSpeed() {
+    return mMaxSpeed;
+  }
+
+  public Geometry.Vector getStartEnemyVector() {
+    return mStartEnemyVector;
+  }
+
   /*********************************************/
 
   public void initGame() {
@@ -200,7 +208,7 @@ public class GameMechanics {
 
     final Geometry.Circle chipCircle;
     if (mChipObject != null) {
-      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 50, -orientation[1] / 50));
+      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 25, -orientation[1] / 25));
       mChipObject.move();
 
       final Geometry.Point chipPosition = mChipObject.getPosition();
@@ -355,8 +363,9 @@ public class GameMechanics {
             add(startEnemyVector.rotateRandom(rnd));
             add(startEnemyVector.rotateRandom(rnd));
           }})
-          .setStartEnemyVector(startEnemyVector).setMaxSpeed(0.025f * level * level / 2) // same
-          .setAcceleration(0.000005f * level) // todo(me), 10/21/15: calculate nice algorithm
+          .setStartEnemyVector(startEnemyVector).setMaxSpeed(
+              0.01f * (float) Math.sqrt(2f * level)) // same
+          .setAcceleration(0.0000025f * level) // todo(me), 10/21/15: calculate nice algorithm
           .setDifficultyLevel(level).build();
     }
 

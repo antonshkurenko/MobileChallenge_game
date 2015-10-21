@@ -40,10 +40,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private static final int SMILE = 3;
 
   // @formatter:off
-    private final float[] mProjectionMatrix = new float[16];
-   private final float[  ] mModelMatrix = new float[16];
-  private final float[    ] mModelProjectionMatrix = new float[16];
-           private int [] mTextures;
+        private final float[] mProjectionMatrix = new float[16];
+       private final float[  ] mModelMatrix = new float[16];
+      private final float[    ] mModelProjectionMatrix = new float[16];
+            private int [      ] mTextures;
+   private final float [        ] mYellow = new float[] { 0.901960784f, 0.91372549f, 0f };
+  private final float [          ] mOrange = new float[] { 0.996078431f, 0.301960784f, 0.066666667f };
+       private final float [] mRed = new float[] { 1f, 0.066666667f, 0f };
+       private final float [] mGreen = new float[] { 0.101960784f, 0.580392157f, 0.192156863f };
   // @formatter:on
   private final Context mContext;
 
@@ -131,8 +135,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
       mChipView.bindData(mTextureProgram);
       positionObjectInScene(chipPosition.x, chipPosition.y);
-      mTextureProgram.setUniforms(mModelProjectionMatrix,
-          new float[] { 0.101960784f, 0.580392157f, 0.192156863f, 1.0f }, mTextures[SMILE], 0);
+      mTextureProgram.setUniforms(mModelProjectionMatrix, mGreen, mTextures[SMILE], 0);
       chip.draw();
     }
 
@@ -151,12 +154,42 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
 
     if (enemies != null) {
-      mEnemyView.bindData(mTextureProgram); for (int i = 0; i < enemies.size(); i++) {
+      mEnemyView.bindData(mTextureProgram);
+      final float startSpeed = mGameMechanics.getStartEnemyVector().length();
+      final float maxSpeed = mGameMechanics.getMaxSpeed();
+      for (int i = 0; i < enemies.size(); i++) {
         final EnemyObject enemy = enemies.get(i);
         final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
         positionObjectInScene(enemyPosition.x, enemyPosition.y);
-        mTextureProgram.setUniforms(mModelProjectionMatrix,
-            new float[] { 0.901960784f, 0f, 0f, 1f }, mTextures[VERY_ANGRY], i);
+
+        int texture;
+
+        final float speed = enemy.getSpeed().length();
+
+        // percentage of current speed / max speed
+        final float k = (speed - startSpeed) / (maxSpeed - startSpeed);
+
+        if (k >= 0.5f) {
+          texture = VERY_ANGRY;
+        } else if (k >= 0.25f) {
+          texture = ANGRY;
+        } else {
+          texture = SAD;
+        }
+
+        final float[] color = new float[3];
+
+        if (k < 0.5) {
+          for (int j = 0; j < 3; j++) {
+            color[j] = 2 * ((0.5f - k) * mYellow[j] + k * mOrange[j]);
+          }
+        } else {
+          for (int j = 0; j < 3; j++) {
+            color[j] = 2 * ((1 - k) * mOrange[j] + (k - 0.5f) * mRed[j]);
+          }
+        }
+
+        mTextureProgram.setUniforms(mModelProjectionMatrix, color, mTextures[texture], i);
         enemy.draw();
       }
     }

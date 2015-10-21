@@ -24,8 +24,6 @@ public class EnemyView implements Drawable {
   private final VertexArray mTextureVertexArray;
   private final List<Drawable> mDrawList;
 
-  private int mTexture;
-
   public EnemyView(int numPointsAroundChip, float aspectRatio) {
 
     this.radius = EnemyObject.RADIUS;
@@ -37,14 +35,6 @@ public class EnemyView implements Drawable {
     mVertexArray = new VertexArray(generatedData.mVertexData);
     mTextureVertexArray = new VertexArray(generatedData.mTextureData);
     mDrawList = generatedData.mDrawableList;
-  }
-
-  public int getTexture() {
-    return mTexture;
-  }
-
-  public void setTexture(int texture) {
-    mTexture = texture;
   }
 
   @Override public void draw() {
