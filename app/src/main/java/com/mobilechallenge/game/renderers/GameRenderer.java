@@ -64,7 +64,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   }
 
   public void setGameMechanics(GameMechanics mechanics) {
-    if(!mechanics.isInited()) {
+    if (!mechanics.isInited()) {
       throw new IllegalStateException("Setting views to not initialized mechanics.");
     }
     mGameMechanics = mechanics.setChipView(mChipView).setEnemyView(mEnemyView);
@@ -131,7 +131,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
       mChipView.bindData(mTextureProgram);
       positionObjectInScene(chipPosition.x, chipPosition.y);
-      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[SMILE], 0);
+      mTextureProgram.setUniforms(mModelProjectionMatrix,
+          new float[] { 0.101960784f, 0.580392157f, 0.192156863f, 1.0f }, mTextures[SMILE], 0);
       chip.draw();
     }
 
@@ -150,12 +151,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
 
     if (enemies != null) {
-      mEnemyView.bindData(mTextureProgram);
-      for (int i = 0; i < enemies.size(); i++) {
+      mEnemyView.bindData(mTextureProgram); for (int i = 0; i < enemies.size(); i++) {
         final EnemyObject enemy = enemies.get(i);
         final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
         positionObjectInScene(enemyPosition.x, enemyPosition.y);
-        mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[VERY_ANGRY], i);
+        mTextureProgram.setUniforms(mModelProjectionMatrix,
+            new float[] { 0.901960784f, 0f, 0f, 1f }, mTextures[VERY_ANGRY], i);
         enemy.draw();
       }
     }

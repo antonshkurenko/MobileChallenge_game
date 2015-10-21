@@ -59,6 +59,7 @@ public class EnemyView implements Drawable {
   }
 
   public void bindData(DefaultTextureProgram program) {
+
     mVertexArray.setVertexAttribPointer(0, program.getPositionAttributeLocation(),
         POSITION_COMPONENT_COUNT, 0);
 
