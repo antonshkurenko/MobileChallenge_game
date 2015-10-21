@@ -3,14 +3,15 @@ package com.mobilechallenge.game.activities;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.mobilechallenge.game.R;
-import com.mobilechallenge.game.controllers.GameMechanics;
 import com.mobilechallenge.game.controllers.GameThread;
+import com.mobilechallenge.game.renderers.GameRenderer;
 import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 
@@ -20,6 +21,7 @@ public class GameActivity extends AppCompatActivity {
 
   private Gyroscope mGyroscope;
   private GameThread mGameThread;
+  private GameRenderer mGameRenderer;
 
   private boolean mRenderSet = false;
 
@@ -35,17 +37,21 @@ public class GameActivity extends AppCompatActivity {
   @Override protected void onResume() {
     super.onResume();
 
-    if (mRenderSet) {
-      mGlSurfaceView.onResume();
-      mGameThread.setIsRunning(true);
-    }
-
     mGyroscope.start();
+    if (mRenderSet) {
+      mGameThread = new GameThread(this, mGyroscope, mGlSurfaceView, mGameRenderer);
+      mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
+      mGlSurfaceView.onResume();
+      mGameThread.start();
+    }
   }
 
   @Override protected void onPause() {
     if (mRenderSet) {
       mGlSurfaceView.onPause();
+    }
+
+    if(mGameThread.isRunning()) {
       mGameThread.setIsRunning(false);
     }
 
@@ -66,9 +72,9 @@ public class GameActivity extends AppCompatActivity {
     if (supportEs2) {
       //Request an Open ES 2.0 compatible context.
       mGlSurfaceView.setEGLContextClientVersion(2);
-
-      mGameThread = new GameThread(this, new GameMechanics(this, mGyroscope), mGlSurfaceView);
-      mGameThread.start();
+      mGameRenderer = new GameRenderer(this);
+      mGlSurfaceView.setRenderer(mGameRenderer);
+      mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
       mRenderSet = true;
     } else {
       Toast.makeText(this, "This device does not support OpenGL ES 2.0.", Toast.LENGTH_LONG).show();

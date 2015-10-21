@@ -2,9 +2,9 @@ package com.mobilechallenge.game.controllers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.opengl.GLSurfaceView;
 import android.preference.PreferenceManager;
 import com.mobilechallenge.game.renderers.GameRenderer;
+import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 import timber.log.Timber;
 
@@ -24,29 +24,38 @@ public class GameThread extends Thread {
   private GameGlSurfaceView mView;
   private GameRenderer mRenderer;
 
-  boolean mIsRunning = false;
+  private boolean mIsRunning = false;
+  private boolean mIsLost = false;
 
-  public GameThread(Context ctx, GameMechanics mechanics, GameGlSurfaceView view) {
+  public GameThread(Context ctx, Gyroscope gyroscope, GameGlSurfaceView view,
+      GameRenderer gameRenderer) {
     super();
-    mGameMechanics = mechanics;
+    mGameMechanics = new GameMechanics(ctx, gyroscope);
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
 
     mView = view;
-    mRenderer = new GameRenderer(ctx, mechanics);
-    mView.setRenderer(mRenderer);
-    mView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+    mRenderer = gameRenderer;
   }
 
-  public void setIsRunning(boolean isRunning) {
+  public GameMechanics getGameMechanics() {
+    return mGameMechanics;
+  }
+
+  public synchronized void setIsRunning(boolean isRunning) {
     mIsRunning = isRunning;
-    if (!isRunning) {
+    if (!isRunning && !mIsLost) {
       mGameMechanics.save();
     }
+  }
+
+  public boolean isRunning() {
+    return mIsRunning;
   }
 
   @Override public void run() {
 
     mIsRunning = true;
+    mIsLost = false;
 
     if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
       mGameMechanics.restoreGame();
@@ -66,8 +75,10 @@ public class GameThread extends Thread {
       while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
 
         if (!mGameMechanics.step()) {
+          Timber.d("You lost");
           countInterpolation(nextGameTick);
           mView.requestRender();
+          mIsLost = true;
           break gameCycle; // You lost
         }
         nextGameTick += SKIP_TICKS;
@@ -79,7 +90,6 @@ public class GameThread extends Thread {
     }
 
     mIsRunning = false; // ready to run again
-    Timber.d("You lost");
   }
 
   private void countInterpolation(long nextGameTick) {

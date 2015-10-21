@@ -59,9 +59,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
   private float mInterpolation = 0f;
 
-  public GameRenderer(Context ctx, GameMechanics gameMechanics) {
+  public GameRenderer(Context ctx) {
     mContext = ctx;
-    mGameMechanics = gameMechanics;
+  }
+
+  public void setGameMechanics(GameMechanics mechanics) {
+    mGameMechanics = mechanics;
   }
 
   public void setInterpolation(float interpolation) {

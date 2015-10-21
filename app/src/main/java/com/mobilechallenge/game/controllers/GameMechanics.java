@@ -17,6 +17,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import timber.log.Timber;
 
 /**
  * Project: Game
@@ -65,6 +66,7 @@ public class GameMechanics {
   }
 
   public GameMechanics setAspectRatio(float aspectRatio) {
+    Timber.i("Aspect ratio from setter is %f.", aspectRatio);
     mAspectRatio = aspectRatio;
     return this;
   }
@@ -91,10 +93,6 @@ public class GameMechanics {
     return mEnemyObjects;
   }
 
-  public boolean isInited() {
-    return mIsInited;
-  }
-
   public void initGame() {
     createGameFromParams(GameParams.level(mRandom, mDifficultyLevel, mAspectRatio));
   }
@@ -119,7 +117,8 @@ public class GameMechanics {
     builder.setStartEnemyVector(mStartEnemyVector)
         .setDifficultyLevel(mDifficultyLevel)
         .setMaxSpeed(mMaxSpeed)
-        .setMultiplierSpeed(mMultiplierSpeed);
+        .setMultiplierSpeed(mMultiplierSpeed)
+        .setAspectRatio(mAspectRatio);
 
     final List<Geometry.Point> enemyPositions = new ArrayList<>();
     final List<Geometry.Vector> enemyVectors = new ArrayList<>();
@@ -158,6 +157,7 @@ public class GameMechanics {
     mStartEnemyVector = params.getStartEnemyVector();
     mDifficultyLevel = params.getDifficultyLevel();
     mAspectRatio = params.getAspectRatio();
+    Timber.d("Aspect ration from params is %f.", mAspectRatio);
 
     mIsInited = true;
   }
@@ -183,6 +183,8 @@ public class GameMechanics {
           || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio
           || chipPosition.y > TOP_BOUND - ChipObject.RADIUS
           || chipPosition.y < BOTTOM_BOUND + ChipObject.RADIUS) {
+        Timber.d("Aspect ratio is %f", mAspectRatio);
+        Timber.d("Lost by touching bounds. Pos is (%f,%f).", chipPosition.x, chipPosition.y);
         return false; // lose
       }
 
@@ -219,6 +221,7 @@ public class GameMechanics {
       if (chipCircle != null) {
         final Geometry.Circle enemyCircle = new Geometry.Circle(position, EnemyObject.RADIUS);
         if (enemyCircle.softIntersects(chipCircle)) {
+          Timber.d("Lost by touching enemies.");
           return false; // you lost
         }
       }
