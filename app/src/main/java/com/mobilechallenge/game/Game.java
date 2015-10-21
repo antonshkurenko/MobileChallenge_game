@@ -1,6 +1,7 @@
 package com.mobilechallenge.game;
 
 import android.app.Application;
+import com.rollbar.android.Rollbar;
 import timber.log.Timber;
 
 /**
@@ -12,6 +13,8 @@ public class Game extends Application {
 
   @Override public void onCreate() {
     super.onCreate();
+
     Timber.plant(new Timber.DebugTree());
+    Rollbar.init(this, getResources().getString(R.string.rollbar_key), "development");
   }
 }

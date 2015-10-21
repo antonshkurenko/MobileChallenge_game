@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
+import android.graphics.Typeface;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -47,28 +48,6 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     }
   }
 
-  private void pause() {
-    if (mGameThread.isRunning()) {
-      mGameThread.setIsRunning(false); // pause game
-    }
-
-    mStart.setText(mResumeString);
-    mStart.setVisibility(View.VISIBLE);
-  }
-
-  private void resume() {
-    if (mGameThread.isRunning()) {
-      mGameThread.setIsRunning(false); // if preview is running
-    }
-
-    mStart.setVisibility(View.GONE);
-    if (mRenderSet) {
-      mGameThread = getNewThread(false); // start new thread
-      mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
-      mGameThread.start();
-    }
-  }
-
   @Override public void onLost() {
     runOnUiThread(() -> {
       mStart.setText(mStartString);
@@ -85,7 +64,7 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     setContentView(R.layout.activity_game);
     ButterKnife.bind(this);
 
-    Timber.d("OnCreate called.");
+    mStart.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf"));
 
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -167,5 +146,27 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
 
   private GameThread getNewThread(boolean preview) {
     return new GameThread(this, mGyroscope, mGlSurfaceView, mGameRenderer, preview);
+  }
+
+  private void pause() {
+    if (mGameThread.isRunning()) {
+      mGameThread.setIsRunning(false); // pause game
+    }
+
+    mStart.setText(mResumeString);
+    mStart.setVisibility(View.VISIBLE);
+  }
+
+  private void resume() {
+    if (mGameThread.isRunning()) {
+      mGameThread.setIsRunning(false); // if preview is running
+    }
+
+    mStart.setVisibility(View.GONE);
+    if (mRenderSet) {
+      mGameThread = getNewThread(false); // start new thread
+      mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
+      mGameThread.start();
+    }
   }
 }
