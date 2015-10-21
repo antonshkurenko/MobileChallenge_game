@@ -46,7 +46,7 @@ public class GameActivity extends AppCompatActivity
 
   private boolean mRenderSet = false;
 
-  @OnClick(R.id.gl_surface) void toggleState() {
+  @OnClick({ R.id.gl_surface, R.id.start_button }) void toggleState() {
     if (mStart.getVisibility() == View.VISIBLE) {
       resume();
     } else {
