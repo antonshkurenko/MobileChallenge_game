@@ -24,17 +24,31 @@ public class GameThread extends Thread {
   private GameGlSurfaceView mView;
   private GameRenderer mRenderer;
 
+  private LostCallback mLostCallback;
+
   private boolean mIsRunning = false;
   private boolean mIsLost = false;
+  private boolean mIsPreview = false;
 
   public GameThread(Context ctx, Gyroscope gyroscope, GameGlSurfaceView view,
-      GameRenderer gameRenderer) {
+      GameRenderer gameRenderer, boolean preview) {
     super();
+
+    try {
+      mLostCallback = (LostCallback) ctx;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(ctx.toString() + " must implement LostCallback");
+    }
+
     mGameMechanics = new GameMechanics(ctx, gyroscope);
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
 
     mView = view;
     mRenderer = gameRenderer;
+
+    mIsPreview = preview;
+
+    initGameMechanics();
   }
 
   public GameMechanics getGameMechanics() {
@@ -43,7 +57,7 @@ public class GameThread extends Thread {
 
   public synchronized void setIsRunning(boolean isRunning) {
     mIsRunning = isRunning;
-    if (!isRunning && !mIsLost) {
+    if (!isRunning && !mIsLost && !mIsPreview) {
       mGameMechanics.save();
     }
   }
@@ -56,14 +70,6 @@ public class GameThread extends Thread {
 
     mIsRunning = true;
     mIsLost = false;
-
-    if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
-      mGameMechanics.restoreGame();
-    } else {
-      mGameMechanics.setGameLevel(
-          mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL1));
-      mGameMechanics.initGame();
-    }
 
     long nextGameTick = System.currentTimeMillis(); // start time
     int loops;
@@ -79,6 +85,7 @@ public class GameThread extends Thread {
           countInterpolation(nextGameTick);
           mView.requestRender();
           mIsLost = true;
+          mLostCallback.onLost();
           break gameCycle; // You lost
         }
         nextGameTick += SKIP_TICKS;
@@ -92,10 +99,29 @@ public class GameThread extends Thread {
     mIsRunning = false; // ready to run again
   }
 
+  private void initGameMechanics() {
+    if (!mIsPreview) {
+      if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
+        mGameMechanics.restoreGame();
+      } else {
+        mGameMechanics.setGameLevel(
+            mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL1));
+        mGameMechanics.initGame();
+      }
+    } else {
+      mGameMechanics.setGameLevel(GameMechanics.GameParams.LEVEL_PREVIEW);
+      mGameMechanics.initGame();
+    }
+  }
+
   private void countInterpolation(long nextGameTick) {
     final float interpolation =
         (float) (System.currentTimeMillis() + SKIP_TICKS - nextGameTick) / (float) SKIP_TICKS;
 
     mRenderer.setInterpolation(interpolation);
+  }
+
+  public interface LostCallback {
+    void onLost(); // todo(me), 10/21/15: later set count etc
   }
 }

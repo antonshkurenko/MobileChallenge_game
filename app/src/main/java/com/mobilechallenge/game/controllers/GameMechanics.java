@@ -85,6 +85,10 @@ public class GameMechanics {
     return this;
   }
 
+  public boolean isInited() {
+    return mIsInited;
+  }
+
   @Nullable public synchronized ChipObject getChipObject() {
     return mChipObject;
   }

@@ -64,7 +64,10 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   }
 
   public void setGameMechanics(GameMechanics mechanics) {
-    mGameMechanics = mechanics;
+    if(!mechanics.isInited()) {
+      throw new IllegalStateException("Setting views to not initialized mechanics.");
+    }
+    mGameMechanics = mechanics.setChipView(mChipView).setEnemyView(mEnemyView);
   }
 
   public void setInterpolation(float interpolation) {
@@ -92,13 +95,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     Timber.i("Width is %d, height is %d, aspect is %f", width, height, aspectRatio);
 
-    if(mGameMechanics.getChipObject() != null) {
-      mChipView = new ChipView(32, aspectRatio);
-    } else {
-      mChipView = null;
-    }
+    mChipView = new ChipView(32, aspectRatio);
     mEnemyView = new EnemyView(32, aspectRatio);
-
     mGameMechanics.setAspectRatio(aspectRatio).setChipView(mChipView).setEnemyView(mEnemyView);
 
     // use aspect ratio not here, but later
@@ -150,13 +148,16 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      */
 
     final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
-    mEnemyView.bindData(mTextureProgram);
-    for (int i = 0; i < enemies.size(); i++) {
-      final EnemyObject enemy = enemies.get(i);
-      final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
-      positionObjectInScene(enemyPosition.x, enemyPosition.y);
-      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[VERY_ANGRY], i);
-      enemy.draw();
+
+    if (enemies != null) {
+      mEnemyView.bindData(mTextureProgram);
+      for (int i = 0; i < enemies.size(); i++) {
+        final EnemyObject enemy = enemies.get(i);
+        final Geometry.Point enemyPosition = enemy.getInterpolatedPosition(mInterpolation);
+        positionObjectInScene(enemyPosition.x, enemyPosition.y);
+        mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[VERY_ANGRY], i);
+        enemy.draw();
+      }
     }
   }
 

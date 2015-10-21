@@ -6,11 +6,23 @@
     android:layout_height="match_parent"
     tools:context="com.mobilechallenge.game.activities.GameActivity">
 
-    <!--other views-->
+  <!--other views-->
 
   <com.mobilechallenge.game.views.GameGlSurfaceView
       android:id="@+id/gl_surface"
       android:layout_width="match_parent"
       android:layout_height="match_parent"/>
+
+  <Button
+      android:id="@+id/start_button"
+      android:background="@null"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textSize="@dimen/text_size_super_giant"
+      android:textAllCaps="true"
+      android:textColor="@android:color/black"
+      android:text="@string/resume"
+      android:layout_centerInParent="true"
+      />
 
 </RelativeLayout>
