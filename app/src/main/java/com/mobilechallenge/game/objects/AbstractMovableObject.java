@@ -45,8 +45,8 @@ public abstract class AbstractMovableObject extends BaseObject implements Movabl
     mVector = mVector.scale(f);
   }
 
-  public void accelerate(Geometry.Vector add) {
-    mVector = mVector.add(add);
+  public void accelerate(float add) {
+    mVector = mVector.extend2d(add);
   }
 
   public void rotateRandom(Random r) {

@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.Bind;
@@ -25,11 +26,14 @@ import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 import timber.log.Timber;
 
-public class GameActivity extends AppCompatActivity implements GameThread.EventsCallback {
+public class GameActivity extends AppCompatActivity
+    implements GameThread.EventsCallback, SeekBar.OnSeekBarChangeListener {
 
   @Bind(R.id.gl_surface) GameGlSurfaceView mGlSurfaceView;
   @Bind(R.id.start_button) Button mStart;
   @Bind(R.id.timer) TextView mTimerText;
+  @Bind(R.id.difficulty_level_bar) SeekBar mDifficultyBar;
+  @Bind(R.id.difficulty_text) TextView mDifficultyText;
 
   @BindString(R.string.start) String mStartString;
   @BindString(R.string.resume) String mResumeString;
@@ -57,7 +61,7 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
   }
 
   @Override public void onUpdate(String time) {
-    if(!mGameThread.isPreview()) {
+    if (!mGameThread.isPreview()) {
       runOnUiThread(() -> mTimerText.setText(time));
     }
   }
@@ -66,6 +70,8 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
     runOnUiThread(() -> {
       mStart.setText(mStartString);
       mStart.setVisibility(View.VISIBLE);
+      mDifficultyBar.setVisibility(View.VISIBLE);
+      mDifficultyText.setVisibility(View.VISIBLE);
       mTimerText.setText(finalTime);
     });
 
@@ -76,9 +82,21 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
   }
 
   @Override public void onEndGame() {
-    if(mGameThread.isPreview()) {
+    if (mGameThread.isPreview()) {
       runOnUiThread(() -> mTimerText.setVisibility(View.GONE));
     }
+  }
+
+  @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    mDifficultyText.setText((progress + 1) + "");
+  }
+
+  @Override public void onStartTrackingTouch(SeekBar seekBar) {
+    // ignored
+  }
+
+  @Override public void onStopTrackingTouch(SeekBar seekBar) {
+    mSharedPreferences.edit().putInt(GameMechanics.PREFS_LEVEL, seekBar.getProgress() + 1).apply();
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +104,17 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
     setContentView(R.layout.activity_game);
     ButterKnife.bind(this);
 
-    mStart.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf"));
+    final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
+    mStart.setTypeface(typeface);
+    mDifficultyText.setTypeface(typeface);
+    mDifficultyBar.setOnSeekBarChangeListener(this);
 
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+    final int difficulty = mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, 1);
+
+    mDifficultyBar.setProgress(difficulty - 1);
+    mDifficultyText.setText(difficulty + "");
 
     mGyroscope = new Gyroscope(this);
     initSurface();
@@ -156,6 +182,8 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
       } else {
         mGameThread.start(); // start preview
         mStart.setText(mStartString);
+        mDifficultyBar.setVisibility(View.VISIBLE);
+        mDifficultyText.setVisibility(View.VISIBLE);
       }
 
       Timber.d("InitSurface, game is saved: %b.", saved);
@@ -185,6 +213,8 @@ public class GameActivity extends AppCompatActivity implements GameThread.Events
     }
 
     mStart.setVisibility(View.GONE);
+    mDifficultyBar.setVisibility(View.GONE);
+    mDifficultyText.setVisibility(View.GONE);
     if (mRenderSet) {
       mGameThread = getNewThread(false); // start new thread
       mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());

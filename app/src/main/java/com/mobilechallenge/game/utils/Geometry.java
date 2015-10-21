@@ -142,16 +142,27 @@ public class Geometry {
       return new Vector(x * f, y * f, z * f);
     }
 
+    public Vector extend2d(float add) {
+      return new Vector(x * (1 + Math.abs(add / x)), y * (1 + Math.abs(add / y)));
+    }
+
     public Vector add(Vector other) {
       return new Vector(x + other.x, y + other.y, z + other.z);
     }
 
     public Vector rotateRandom(Random r) {
 
-      double angle = r.nextFloat() * 2 * Math.PI;
+      float angle = r.nextFloat() * 2 * (float) Math.PI;
+      return rotate(angle);
+    }
 
+    public Vector rotate(float angle) {
       return new Vector(x * (float) Math.cos(angle) - y * (float) Math.sin(angle),
           x * (float) Math.sin(angle) + y * (float) Math.cos(angle));
+    }
+
+    public float angle() {
+      return (float) Math.atan2(y, x);
     }
   }
 

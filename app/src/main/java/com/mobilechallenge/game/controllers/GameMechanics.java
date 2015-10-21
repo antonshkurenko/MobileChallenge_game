@@ -46,7 +46,7 @@ public class GameMechanics {
   // params
   private Geometry.Vector mStartEnemyVector;
   private float mMaxSpeed;
-  private float mMultiplierSpeed;
+  private float mAcceleration;
   private int mDifficultyLevel = GameParams.LEVEL_PREVIEW;
   private long mTimePassed;
 
@@ -143,7 +143,7 @@ public class GameMechanics {
     builder.setStartEnemyVector(mStartEnemyVector)
         .setDifficultyLevel(mDifficultyLevel)
         .setMaxSpeed(mMaxSpeed)
-        .setMultiplierSpeed(mMultiplierSpeed)
+        .setAcceleration(mAcceleration)
         .setAspectRatio(mAspectRatio)
         .setTimePassed(mTimePassed);
 
@@ -180,7 +180,7 @@ public class GameMechanics {
     }
 
     mMaxSpeed = params.getMaxSpeed();
-    mMultiplierSpeed = params.getMultiplierSpeed();
+    mAcceleration = params.getAcceleration();
     mStartEnemyVector = params.getStartEnemyVector();
     mDifficultyLevel = params.getDifficultyLevel();
     mAspectRatio = params.getAspectRatio();
@@ -199,7 +199,7 @@ public class GameMechanics {
 
     final Geometry.Circle chipCircle;
     if (mChipObject != null) {
-      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 100, -orientation[1] / 100));
+      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 50, -orientation[1] / 50));
       mChipObject.move();
 
       final Geometry.Point chipPosition = mChipObject.getPosition();
@@ -227,7 +227,13 @@ public class GameMechanics {
       final EnemyObject enemy = mEnemyObjects.get(i);
 
       enemy.move();
-      enemy.scaleSpeed(1.002f);
+
+      if (i == 0) {
+        Timber.d("Speed is %f, max speed is %f.", enemy.getSpeed().length(), mMaxSpeed);
+      }
+      if (enemy.getSpeed().length() <= mMaxSpeed) {
+        enemy.accelerate(mAcceleration);
+      }
 
       final Geometry.Point position = enemy.getPosition();
 
@@ -293,7 +299,7 @@ public class GameMechanics {
     private List<Geometry.Vector> mEnemyVectors;
     private Geometry.Vector mStartEnemyVector;
     private float mMaxSpeed;
-    private float mMultiplierSpeed;
+    private float mAcceleration;
     private int mDifficultyLevel;
     private float mAspectRatio;
     private long mTimePassed;
@@ -311,15 +317,15 @@ public class GameMechanics {
 
     private GameParams(Geometry.Point chipPosition, Geometry.Vector chipSpeed,
         List<Geometry.Point> enemyPositions, List<Geometry.Vector> enemyVectors,
-        Geometry.Vector startEnemyVector, float maxSpeed, float multiplierSpeed,
-        int difficultyLevel, float aspectRatio, long timePassed) {
+        Geometry.Vector startEnemyVector, float maxSpeed, float acceleration, int difficultyLevel,
+        float aspectRatio, long timePassed) {
       this.mChipPosition = chipPosition;
       this.mChipSpeed = chipSpeed;
       this.mEnemyPositions = enemyPositions;
       this.mEnemyVectors = enemyVectors;
       this.mStartEnemyVector = startEnemyVector;
       this.mMaxSpeed = maxSpeed;
-      this.mMultiplierSpeed = multiplierSpeed;
+      this.mAcceleration = acceleration;
       this.mDifficultyLevel = difficultyLevel;
       this.mAspectRatio = aspectRatio;
       this.mTimePassed = timePassed;
@@ -348,9 +354,8 @@ public class GameMechanics {
             add(startEnemyVector.rotateRandom(rnd));
             add(startEnemyVector.rotateRandom(rnd));
           }})
-          .setStartEnemyVector(startEnemyVector)
-          .setMaxSpeed(0.01f * level * level / 2f).setMultiplierSpeed(
-              0.0001f * level) // todo(me), 10/21/15: calculate (30 sec / diffLevel)
+          .setStartEnemyVector(startEnemyVector).setMaxSpeed(0.025f * level * level / 2) // same
+          .setAcceleration(0.000005f * level) // todo(me), 10/21/15: calculate nice algorithm
           .setDifficultyLevel(level).build();
     }
 
@@ -390,8 +395,8 @@ public class GameMechanics {
       return mMaxSpeed;
     }
 
-    public float getMultiplierSpeed() {
-      return mMultiplierSpeed;
+    public float getAcceleration() {
+      return mAcceleration;
     }
 
     public int getDifficultyLevel() {
@@ -423,7 +428,7 @@ public class GameMechanics {
       private List<Geometry.Vector> mEnemyVectors;
       private Geometry.Vector mStartEnemyVector;
       private float mMaxSpeed;
-      private float mMultiplierSpeed;
+      private float mAcceleration;
       private int mDifficultyLevel;
       private float mAspectRatio;
       private long mTimePassed = 0l;
@@ -458,8 +463,8 @@ public class GameMechanics {
         return this;
       }
 
-      public Builder setMultiplierSpeed(float multiplierSpeed) {
-        mMultiplierSpeed = multiplierSpeed;
+      public Builder setAcceleration(float acceleration) {
+        mAcceleration = acceleration;
         return this;
       }
 
@@ -480,7 +485,7 @@ public class GameMechanics {
 
       public GameParams build() {
         return new GameParams(mChipPosition, mChipSpeed, mEnemyPositions, mEnemyVectors,
-            mStartEnemyVector, mMaxSpeed, mMultiplierSpeed, mDifficultyLevel, mAspectRatio,
+            mStartEnemyVector, mMaxSpeed, mAcceleration, mDifficultyLevel, mAspectRatio,
             mTimePassed);
       }
     }
