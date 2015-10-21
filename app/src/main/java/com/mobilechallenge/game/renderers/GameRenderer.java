@@ -143,14 +143,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * Drawing enemies
      */
 
-    // todo(me), 10/20/15: add color gradient to faces:
-    /**
-     * if p <= 1.0
-     * colorT = colorA * p + colorB * (1.0 - p);
-     * else
-     * colorT = colorB * (p - 1.0) + colorC * (2.0 - p);
-     */
-
     final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
 
     if (enemies != null) {

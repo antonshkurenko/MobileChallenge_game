@@ -5,13 +5,19 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.Drawable;
 import com.mobilechallenge.game.objects.EnemyObject;
 import com.mobilechallenge.game.utils.FileWriter;
 import com.mobilechallenge.game.utils.Geometry;
 import com.mobilechallenge.game.utils.Gyroscope;
+import com.mobilechallenge.game.utils.deserializers.GameParamsDeserializer;
+import com.mobilechallenge.game.utils.deserializers.PointDeserializer;
+import com.mobilechallenge.game.utils.deserializers.VectorDeserializer;
+import com.mobilechallenge.game.utils.serializers.GameParamsSerializer;
+import com.mobilechallenge.game.utils.serializers.PointSerializer;
+import com.mobilechallenge.game.utils.serializers.VectorSerializer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -370,11 +376,21 @@ public class GameMechanics {
     }
 
     public static GameParams restore(Context ctx) {
-      return new Gson().fromJson(FileWriter.read(ctx, FILE_NAME), GameParams.class);
+      return new GsonBuilder()
+          .registerTypeAdapter(Geometry.Point.class, new PointDeserializer())
+          .registerTypeAdapter(Geometry.Vector.class, new VectorDeserializer())
+          .registerTypeAdapter(GameParams.class, new GameParamsDeserializer())
+          .create()
+          .fromJson(FileWriter.read(ctx, FILE_NAME), GameParams.class);
     }
 
     public synchronized void save(Context ctx) {
-      FileWriter.write(ctx, FILE_NAME, new Gson().toJson(this));
+      FileWriter.write(ctx, FILE_NAME,
+          new GsonBuilder().registerTypeAdapter(Geometry.Point.class, new PointSerializer())
+              .registerTypeAdapter(Geometry.Vector.class, new VectorSerializer())
+              .registerTypeAdapter(GameParams.class, new GameParamsSerializer())
+              .create()
+              .toJson(this));
     }
 
     /**
