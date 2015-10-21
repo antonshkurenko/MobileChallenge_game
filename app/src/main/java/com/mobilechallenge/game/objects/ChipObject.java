@@ -19,8 +19,4 @@ public class ChipObject extends AbstractMovableObject {
       Geometry.Vector startSpeedVector) {
     super(image, startPosition, startSpeedVector);
   }
-
-  @Override public void setImage(Drawable image) {
-    super.setImage(image);
-  }
 }

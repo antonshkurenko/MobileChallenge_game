@@ -9,7 +9,7 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import com.mobilechallenge.game.R;
-import com.mobilechallenge.game.controllers.GameState;
+import com.mobilechallenge.game.controllers.GameMechanics;
 import com.mobilechallenge.game.controllers.GameThread;
 import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
@@ -67,7 +67,7 @@ public class GameActivity extends AppCompatActivity {
       //Request an Open ES 2.0 compatible context.
       mGlSurfaceView.setEGLContextClientVersion(2);
 
-      mGameThread = new GameThread(this, new GameState(mGyroscope), mGlSurfaceView);
+      mGameThread = new GameThread(this, new GameMechanics(mGyroscope), mGlSurfaceView);
       mGameThread.start();
       mRenderSet = true;
     } else {

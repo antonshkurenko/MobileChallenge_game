@@ -13,8 +13,7 @@ public abstract class AbstractMovableObject extends BaseObject implements Movabl
   protected Geometry.Point mPosition;
   protected Geometry.Vector mVector; // speed
 
-  public AbstractMovableObject(Geometry.Point startPosition,
-      Geometry.Vector startSpeedVector) {
+  public AbstractMovableObject(Geometry.Point startPosition, Geometry.Vector startSpeedVector) {
     this(null, startPosition, startSpeedVector);
   }
 
@@ -54,11 +53,15 @@ public abstract class AbstractMovableObject extends BaseObject implements Movabl
     mVector = mVector.rotateRandom(r);
   }
 
+  public void setPosition(Geometry.Point newPosition) {
+    mPosition = newPosition;
+  }
+
   public Geometry.Point getPosition() {
     return mPosition;
   }
 
-  public void setPosition(Geometry.Point newPosition) {
-    mPosition = newPosition;
+  public Geometry.Vector getSpeed() {
+    return mVector;
   }
 }

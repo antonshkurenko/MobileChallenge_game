@@ -3,7 +3,7 @@ package com.mobilechallenge.game.renderers;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import com.mobilechallenge.game.R;
-import com.mobilechallenge.game.controllers.GameState;
+import com.mobilechallenge.game.controllers.GameMechanics;
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.EnemyObject;
 import com.mobilechallenge.game.programs.DefaultTextureProgram;
@@ -51,7 +51,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private SimpleSingleColorShaderProgram mSingleColorProgram;
   private DefaultTextureProgram mTextureProgram;
 
-  private GameState mGameState;
+  private GameMechanics mGameMechanics;
 
   // views
   private DeckView mDeckView;
@@ -62,10 +62,10 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
   private float mInterpolation = 0f;
 
-  public GameRenderer(Context ctx, GameState gameState) {
+  public GameRenderer(Context ctx, GameMechanics gameMechanics) {
     mContext = ctx;
 
-    mGameState = gameState;
+    mGameMechanics = gameMechanics;
   }
 
   public void setInterpolation(float interpolation) {
@@ -97,8 +97,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     mChipView = new ChipView(32, aspectRatio);
     mEnemyView = new EnemyView(32, aspectRatio);
 
-    mGameState.initGame(aspectRatio);
-    mGameState.setChipView(mChipView).setEnemyView(mEnemyView);
+    mGameMechanics.createGameFromParams(aspectRatio);
+    mGameMechanics.setChipView(mChipView).setEnemyView(mEnemyView);
 
     // use aspect ratio not here, but later
     orthoM(mProjectionMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f);
@@ -112,7 +112,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     mVaryingColorProgram.setUniforms(mProjectionMatrix);
     mDeckView.draw();
 
-    final ChipObject chip = mGameState.getChipObject();
+    final ChipObject chip = mGameMechanics.getChipObject();
     final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
 
     // todo(me), 10/20/15: add color gradient to faces:
@@ -128,7 +128,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[SMILE], 0);
     chip.draw();
 
-    final List<EnemyObject> enemies = mGameState.getEnemyObjects();
+    final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
 
     mEnemyView.bindData(mTextureProgram);
     for (int i = 0; i < enemies.size(); i++) {

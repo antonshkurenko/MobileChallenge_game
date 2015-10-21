@@ -17,16 +17,16 @@ public class GameThread extends Thread {
   private static final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
   private static final int MAX_FRAMESKIP = 5;
 
-  private GameState mGameState;
+  private GameMechanics mGameMechanics;
   private GameGlSurfaceView mView;
 
   private GameRenderer mRenderer;
 
   boolean mIsRunning = true;
 
-  public GameThread(Context ctx, GameState state, GameGlSurfaceView view) {
+  public GameThread(Context ctx, GameMechanics state, GameGlSurfaceView view) {
     super();
-    mGameState = state;
+    mGameMechanics = state;
     mView = view;
     mRenderer = new GameRenderer(ctx, state);
     mView.setRenderer(mRenderer);
@@ -48,7 +48,7 @@ public class GameThread extends Thread {
       loops = 0;
       while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
 
-        if (!mGameState.step()) {
+        if (!mGameMechanics.step()) {
           mIsRunning = false;
           countInterpolation(nextGameTick);
           mView.requestRender();
