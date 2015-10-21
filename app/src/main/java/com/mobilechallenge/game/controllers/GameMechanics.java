@@ -26,6 +26,7 @@ import java.util.Random;
 public class GameMechanics {
 
   public static final String PREFS_IS_SAVED = "hey_i_just_met_you";
+  public static final String PREFS_LEVEL = "relax_don_t_do_it";
 
   private static final float RIGHT_BOUND = 1f;
   private static final float LEFT_BOUND = -1f;
@@ -45,9 +46,9 @@ public class GameMechanics {
   private Geometry.Vector mStartEnemyVector;
   private float mMaxSpeed;
   private float mMultiplierSpeed;
-  private int mDifficultyLevel;
+  private int mDifficultyLevel = GameParams.LEVEL_PREVIEW;
 
-  private float mAspectRatio;
+  private float mAspectRatio = 1f;
 
   private boolean mIsInited = false;
 
@@ -58,13 +59,20 @@ public class GameMechanics {
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
   }
 
+  public GameMechanics setGameLevel(int level) {
+    mDifficultyLevel = level;
+    return this;
+  }
+
   public GameMechanics setAspectRatio(float aspectRatio) {
     mAspectRatio = aspectRatio;
     return this;
   }
 
   public GameMechanics setChipView(Drawable chip) {
-    mChipObject.setImage(chip);
+    if (mChipObject != null) {
+      mChipObject.setImage(chip);
+    }
     return this;
   }
 
@@ -75,7 +83,7 @@ public class GameMechanics {
     return this;
   }
 
-  public synchronized ChipObject getChipObject() {
+  @Nullable public synchronized ChipObject getChipObject() {
     return mChipObject;
   }
 
@@ -83,8 +91,12 @@ public class GameMechanics {
     return mEnemyObjects;
   }
 
-  public void initGame(@GameParams.DifficultyLevel int level, float aspectRatio) {
-    createGameFromParams(GameParams.level(mRandom, level, aspectRatio));
+  public boolean isInited() {
+    return mIsInited;
+  }
+
+  public void initGame() {
+    createGameFromParams(GameParams.level(mRandom, mDifficultyLevel, mAspectRatio));
   }
 
   public void restoreGame() {
@@ -145,6 +157,7 @@ public class GameMechanics {
     mMultiplierSpeed = params.getMultiplierSpeed();
     mStartEnemyVector = params.getStartEnemyVector();
     mDifficultyLevel = params.getDifficultyLevel();
+    mAspectRatio = params.getAspectRatio();
 
     mIsInited = true;
   }
@@ -157,24 +170,29 @@ public class GameMechanics {
 
     final float[] orientation = mGyroscope.getOrientationArray(); // 0 x, 1 y
 
-    mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 100, -orientation[1] / 100));
-    mChipObject.move();
+    final Geometry.Circle chipCircle;
+    if (mChipObject != null) {
+      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 100, -orientation[1] / 100));
+      mChipObject.move();
 
-    final Geometry.Point chipPosition = mChipObject.getPosition();
-    final Geometry.Circle chipCircle = new Geometry.Circle(chipPosition, ChipObject.RADIUS);
+      final Geometry.Point chipPosition = mChipObject.getPosition();
+      chipCircle = new Geometry.Circle(chipPosition, ChipObject.RADIUS);
 
-    // if touch any side
-    if (chipPosition.x < LEFT_BOUND + ChipObject.RADIUS / mAspectRatio
-        || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio
-        || chipPosition.y > TOP_BOUND - ChipObject.RADIUS
-        || chipPosition.y < BOTTOM_BOUND + ChipObject.RADIUS) {
-      return false; // lose
+      // if touch any side
+      if (chipPosition.x < LEFT_BOUND + ChipObject.RADIUS / mAspectRatio
+          || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio
+          || chipPosition.y > TOP_BOUND - ChipObject.RADIUS
+          || chipPosition.y < BOTTOM_BOUND + ChipObject.RADIUS) {
+        return false; // lose
+      }
+
+      mChipObject.setPosition(new Geometry.Point(
+          clamp(chipPosition.x, LEFT_BOUND + ChipObject.RADIUS / mAspectRatio,
+              RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio),
+          clamp(chipPosition.y, BOTTOM_BOUND + ChipObject.RADIUS, TOP_BOUND - ChipObject.RADIUS)));
+    } else {
+      chipCircle = null;
     }
-
-    mChipObject.setPosition(new Geometry.Point(
-        clamp(chipPosition.x, LEFT_BOUND + ChipObject.RADIUS / mAspectRatio,
-            RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio),
-        clamp(chipPosition.y, BOTTOM_BOUND + ChipObject.RADIUS, TOP_BOUND - ChipObject.RADIUS)));
 
     for (int i = 0; i < 4; i++) {
 
@@ -198,9 +216,11 @@ public class GameMechanics {
               RIGHT_BOUND - EnemyObject.RADIUS / mAspectRatio),
           clamp(position.y, BOTTOM_BOUND + EnemyObject.RADIUS, TOP_BOUND - EnemyObject.RADIUS)));
 
-      final Geometry.Circle enemyCircle = new Geometry.Circle(position, EnemyObject.RADIUS);
-      if (enemyCircle.softIntersects(chipCircle)) {
-        return false; // you lost
+      if (chipCircle != null) {
+        final Geometry.Circle enemyCircle = new Geometry.Circle(position, EnemyObject.RADIUS);
+        if (enemyCircle.softIntersects(chipCircle)) {
+          return false; // you lost
+        }
       }
     }
     return true;
@@ -246,6 +266,7 @@ public class GameMechanics {
     private float mMaxSpeed;
     private float mMultiplierSpeed;
     private int mDifficultyLevel;
+    private float mAspectRatio;
 
     /**
      * for Gson
@@ -261,7 +282,7 @@ public class GameMechanics {
     private GameParams(Geometry.Point chipPosition, Geometry.Vector chipSpeed,
         List<Geometry.Point> enemyPositions, List<Geometry.Vector> enemyVectors,
         Geometry.Vector startEnemyVector, float maxSpeed, float multiplierSpeed,
-        int difficultyLevel) {
+        int difficultyLevel, float aspectRatio) {
       this.mChipPosition = chipPosition;
       this.mChipSpeed = chipSpeed;
       this.mEnemyPositions = enemyPositions;
@@ -270,6 +291,7 @@ public class GameMechanics {
       this.mMaxSpeed = maxSpeed;
       this.mMultiplierSpeed = multiplierSpeed;
       this.mDifficultyLevel = difficultyLevel;
+      this.mAspectRatio = aspectRatio;
     }
 
     public static GameParams level(Random rnd, @DifficultyLevel int level, float aspectRatio) {
@@ -282,12 +304,13 @@ public class GameMechanics {
       final Geometry.Vector startEnemyVector =
           new Geometry.Vector(0.005f, 0.005f).scale((10f + level) / 10f);
 
-      return new Builder().setEnemyPositions(new ArrayList<Geometry.Point>() {{
-        add(new Geometry.Point(rightX, topY));
-        add(new Geometry.Point(rightX, bottomY));
-        add(new Geometry.Point(leftX, topY));
-        add(new Geometry.Point(leftX, bottomY));
-      }})
+      return new Builder().setAspectRatio(aspectRatio)
+          .setEnemyPositions(new ArrayList<Geometry.Point>() {{
+            add(new Geometry.Point(rightX, topY));
+            add(new Geometry.Point(rightX, bottomY));
+            add(new Geometry.Point(leftX, topY));
+            add(new Geometry.Point(leftX, bottomY));
+          }})
           .setEnemyVectors(new ArrayList<Geometry.Vector>() {{
             add(startEnemyVector.rotateRandom(rnd));
             add(startEnemyVector.rotateRandom(rnd));
@@ -344,6 +367,10 @@ public class GameMechanics {
       return mDifficultyLevel;
     }
 
+    public float getAspectRatio() {
+      return mAspectRatio;
+    }
+
     /*****************************************/
 
     @IntDef({
@@ -363,6 +390,7 @@ public class GameMechanics {
       private float mMaxSpeed;
       private float mMultiplierSpeed;
       private int mDifficultyLevel;
+      private float mAspectRatio;
 
       public Builder setChipPosition(Geometry.Point chipPosition) {
         mChipPosition = chipPosition;
@@ -404,9 +432,14 @@ public class GameMechanics {
         return this;
       }
 
+      public Builder setAspectRatio(float aspectRatio) {
+        mAspectRatio = aspectRatio;
+        return this;
+      }
+
       public GameParams build() {
         return new GameParams(mChipPosition, mChipSpeed, mEnemyPositions, mEnemyVectors,
-            mStartEnemyVector, mMaxSpeed, mMultiplierSpeed, mDifficultyLevel);
+            mStartEnemyVector, mMaxSpeed, mMultiplierSpeed, mDifficultyLevel, mAspectRatio);
       }
     }
   }

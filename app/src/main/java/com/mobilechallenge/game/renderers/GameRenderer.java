@@ -7,7 +7,6 @@ import com.mobilechallenge.game.controllers.GameMechanics;
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.EnemyObject;
 import com.mobilechallenge.game.programs.DefaultTextureProgram;
-import com.mobilechallenge.game.programs.SimpleSingleColorShaderProgram;
 import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.ui.ChipView;
 import com.mobilechallenge.game.ui.DeckView;
@@ -47,8 +46,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
            private int [] mTextures;
   // @formatter:on
   private final Context mContext;
+
   private SimpleVaryingColorShaderProgram mVaryingColorProgram;
-  private SimpleSingleColorShaderProgram mSingleColorProgram;
   private DefaultTextureProgram mTextureProgram;
 
   private GameMechanics mGameMechanics;
@@ -58,13 +57,10 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private ChipView mChipView;
   private EnemyView mEnemyView;
 
-  private int mTempTexture;
-
   private float mInterpolation = 0f;
 
   public GameRenderer(Context ctx, GameMechanics gameMechanics) {
     mContext = ctx;
-
     mGameMechanics = gameMechanics;
   }
 
@@ -76,7 +72,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     mVaryingColorProgram = new SimpleVaryingColorShaderProgram(mContext);
-    mSingleColorProgram = new SimpleSingleColorShaderProgram(mContext);
     mTextureProgram = new DefaultTextureProgram(mContext);
 
     mDeckView = new DeckView(); // since it doesn't need aspect ratio, it's initialized here
@@ -94,11 +89,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     Timber.i("Width is %d, height is %d, aspect is %f", width, height, aspectRatio);
 
-    mChipView = new ChipView(32, aspectRatio);
+    if(mGameMechanics.getChipObject() != null) {
+      mChipView = new ChipView(32, aspectRatio);
+    } else {
+      mChipView = null;
+    }
     mEnemyView = new EnemyView(32, aspectRatio);
 
-    mGameMechanics.createGameFromParams(aspectRatio);
-    mGameMechanics.setChipView(mChipView).setEnemyView(mEnemyView);
+    mGameMechanics.setAspectRatio(aspectRatio).setChipView(mChipView).setEnemyView(mEnemyView);
 
     // use aspect ratio not here, but later
     orthoM(mProjectionMatrix, 0, -1f, 1f, -1f, 1f, -1f, 1f);
@@ -107,13 +105,38 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   @Override public void onDrawFrame(GL10 gl) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    /**
+     * Drawing table
+     */
+
     mVaryingColorProgram.useProgram();
     mDeckView.bindData(mVaryingColorProgram);
     mVaryingColorProgram.setUniforms(mProjectionMatrix);
     mDeckView.draw();
 
+    /**
+     * Start drawing textures
+     */
+    mTextureProgram.useProgram();
+
+    /**
+     * Drawing chip
+     */
+
     final ChipObject chip = mGameMechanics.getChipObject();
-    final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
+
+    if (chip != null) {
+      final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
+
+      mChipView.bindData(mTextureProgram);
+      positionObjectInScene(chipPosition.x, chipPosition.y);
+      mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[SMILE], 0);
+      chip.draw();
+    }
+
+    /**
+     * Drawing enemies
+     */
 
     // todo(me), 10/20/15: add color gradient to faces:
     /**
@@ -122,14 +145,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * else
      * colorT = colorB * (p - 1.0) + colorC * (2.0 - p);
      */
-    mTextureProgram.useProgram();
-    mChipView.bindData(mTextureProgram);
-    positionObjectInScene(chipPosition.x, chipPosition.y);
-    mTextureProgram.setUniforms(mModelProjectionMatrix, mTextures[SMILE], 0);
-    chip.draw();
 
     final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
-
     mEnemyView.bindData(mTextureProgram);
     for (int i = 0; i < enemies.size(); i++) {
       final EnemyObject enemy = enemies.get(i);

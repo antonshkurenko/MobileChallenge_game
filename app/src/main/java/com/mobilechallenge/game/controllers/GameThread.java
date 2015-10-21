@@ -1,7 +1,9 @@
 package com.mobilechallenge.game.controllers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.opengl.GLSurfaceView;
+import android.preference.PreferenceManager;
 import com.mobilechallenge.game.renderers.GameRenderer;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 import timber.log.Timber;
@@ -18,26 +20,41 @@ public class GameThread extends Thread {
   private static final int MAX_FRAMESKIP = 5;
 
   private GameMechanics mGameMechanics;
+  private SharedPreferences mSharedPreferences;
   private GameGlSurfaceView mView;
-
   private GameRenderer mRenderer;
 
-  boolean mIsRunning = true;
+  boolean mIsRunning = false;
 
-  public GameThread(Context ctx, GameMechanics state, GameGlSurfaceView view) {
+  public GameThread(Context ctx, GameMechanics mechanics, GameGlSurfaceView view) {
     super();
-    mGameMechanics = state;
+    mGameMechanics = mechanics;
+    mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+
     mView = view;
-    mRenderer = new GameRenderer(ctx, state);
+    mRenderer = new GameRenderer(ctx, mechanics);
     mView.setRenderer(mRenderer);
     mView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
   }
 
   public void setIsRunning(boolean isRunning) {
     mIsRunning = isRunning;
+    if (!isRunning) {
+      mGameMechanics.save();
+    }
   }
 
   @Override public void run() {
+
+    mIsRunning = true;
+
+    if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
+      mGameMechanics.restoreGame();
+    } else {
+      mGameMechanics.setGameLevel(
+          mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL1));
+      mGameMechanics.initGame();
+    }
 
     long nextGameTick = System.currentTimeMillis(); // start time
     int loops;
@@ -49,7 +66,6 @@ public class GameThread extends Thread {
       while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
 
         if (!mGameMechanics.step()) {
-          mIsRunning = false;
           countInterpolation(nextGameTick);
           mView.requestRender();
           break gameCycle; // You lost
@@ -62,6 +78,7 @@ public class GameThread extends Thread {
       mView.requestRender();
     }
 
+    mIsRunning = false; // ready to run again
     Timber.d("You lost");
   }
 

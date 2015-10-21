@@ -67,7 +67,7 @@ public class GameActivity extends AppCompatActivity {
       //Request an Open ES 2.0 compatible context.
       mGlSurfaceView.setEGLContextClientVersion(2);
 
-      mGameThread = new GameThread(this, new GameMechanics(mGyroscope), mGlSurfaceView);
+      mGameThread = new GameThread(this, new GameMechanics(this, mGyroscope), mGlSurfaceView);
       mGameThread.start();
       mRenderSet = true;
     } else {
