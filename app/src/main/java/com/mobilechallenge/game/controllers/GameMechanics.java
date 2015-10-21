@@ -5,19 +5,13 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.mobilechallenge.game.objects.ChipObject;
 import com.mobilechallenge.game.objects.Drawable;
 import com.mobilechallenge.game.objects.EnemyObject;
 import com.mobilechallenge.game.utils.FileWriter;
 import com.mobilechallenge.game.utils.Geometry;
 import com.mobilechallenge.game.utils.Gyroscope;
-import com.mobilechallenge.game.utils.deserializers.GameParamsDeserializer;
-import com.mobilechallenge.game.utils.deserializers.PointDeserializer;
-import com.mobilechallenge.game.utils.deserializers.VectorDeserializer;
-import com.mobilechallenge.game.utils.serializers.GameParamsSerializer;
-import com.mobilechallenge.game.utils.serializers.PointSerializer;
-import com.mobilechallenge.game.utils.serializers.VectorSerializer;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -30,14 +24,13 @@ import timber.log.Timber;
  * Date: 10/20/15
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
-// fixme(me), 10/21/15: check why right and left sides are not on the screen side
 public class GameMechanics {
 
   public static final String PREFS_IS_SAVED = "hey_i_just_met_you";
   public static final String PREFS_LEVEL = "relax_don_t_do_it";
 
-  private static final float RIGHT_BOUND = 1f;
-  private static final float LEFT_BOUND = -1f;
+  private static final float RIGHT_BOUND = 1.05f; // there is some bug in logic
+  private static final float LEFT_BOUND = -1.05f; // so I have to add this 0.05, to fix bounds
   private static final float TOP_BOUND = 1f;
   private static final float BOTTOM_BOUND = -1f;
 
@@ -214,7 +207,8 @@ public class GameMechanics {
 
     final Geometry.Circle chipCircle;
     if (mChipObject != null) {
-      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 25, -orientation[1] / 25));
+      // todo(me), 10/21/15: add sensitivity prefs
+      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 50, -orientation[1] / 50));
       mChipObject.move();
 
       final Geometry.Point chipPosition = mChipObject.getPosition();
@@ -376,21 +370,11 @@ public class GameMechanics {
     }
 
     public static GameParams restore(Context ctx) {
-      return new GsonBuilder()
-          .registerTypeAdapter(Geometry.Point.class, new PointDeserializer())
-          .registerTypeAdapter(Geometry.Vector.class, new VectorDeserializer())
-          .registerTypeAdapter(GameParams.class, new GameParamsDeserializer())
-          .create()
-          .fromJson(FileWriter.read(ctx, FILE_NAME), GameParams.class);
+      return new Gson().fromJson(FileWriter.read(ctx, FILE_NAME), GameParams.class);
     }
 
     public synchronized void save(Context ctx) {
-      FileWriter.write(ctx, FILE_NAME,
-          new GsonBuilder().registerTypeAdapter(Geometry.Point.class, new PointSerializer())
-              .registerTypeAdapter(Geometry.Vector.class, new VectorSerializer())
-              .registerTypeAdapter(GameParams.class, new GameParamsSerializer())
-              .create()
-              .toJson(this));
+      FileWriter.write(ctx, FILE_NAME, new Gson().toJson(this));
     }
 
     /**

@@ -8,4 +8,5 @@
   <string name="timer_template">00.00.000</string>
   <string name="difficulty_template">1</string>
   <string name="score">You scored</string>
+  <string name="level">level</string>
 </resources>

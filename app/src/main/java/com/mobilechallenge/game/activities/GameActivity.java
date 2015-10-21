@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -35,6 +36,7 @@ public class GameActivity extends AppCompatActivity
   @Bind(R.id.timer) TextView mTimerText;
   @Bind(R.id.difficulty_level_bar) SeekBar mDifficultyBar;
   @Bind(R.id.difficulty_text) TextView mDifficultyText;
+  @Bind(R.id.level_label) TextView mLevelLabel;
   @Bind(R.id.score_label) TextView mScoreLabel;
   @Bind(R.id.score) TextView mScore;
   @Bind(R.id.score_layout) LinearLayout mScoreLayout;
@@ -75,6 +77,7 @@ public class GameActivity extends AppCompatActivity
     mStart.setVisibility(View.VISIBLE);
     mDifficultyBar.setVisibility(View.VISIBLE);
     mDifficultyText.setVisibility(View.VISIBLE);
+    mLevelLabel.setVisibility(View.VISIBLE);
     mScoreOpened = false;
   }
 
@@ -127,9 +130,13 @@ public class GameActivity extends AppCompatActivity
     setContentView(R.layout.activity_game);
     ButterKnife.bind(this);
 
+    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
     final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
     mStart.setTypeface(typeface);
     mDifficultyText.setTypeface(typeface);
+    mLevelLabel.setTypeface(typeface);
     mTimerText.setTypeface(typeface);
     mScoreLabel.setTypeface(typeface);
     mScore.setTypeface(typeface);
@@ -215,6 +222,7 @@ public class GameActivity extends AppCompatActivity
         mStart.setText(mStartString);
         mDifficultyBar.setVisibility(View.VISIBLE);
         mDifficultyText.setVisibility(View.VISIBLE);
+        mLevelLabel.setVisibility(View.VISIBLE);
       }
 
       Timber.d("InitSurface, game is saved: %b.", saved);
@@ -246,6 +254,7 @@ public class GameActivity extends AppCompatActivity
     mStart.setVisibility(View.GONE);
     mDifficultyBar.setVisibility(View.GONE);
     mDifficultyText.setVisibility(View.GONE);
+    mLevelLabel.setVisibility(View.GONE);
     if (mRenderSet) {
       mGameThread = getNewThread(false); // start new thread
       mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());

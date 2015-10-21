@@ -19,12 +19,12 @@ android {
     applicationId "com.mobilechallenge.game"
     minSdkVersion 14
     targetSdkVersion 23
-    versionCode 1
-    versionName "0.01"
+    versionCode 6
+    versionName "0.06"
   }
   buildTypes {
     release {
-      minifyEnabled true
+      minifyEnabled false // thanks gson
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
