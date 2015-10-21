@@ -21,6 +21,7 @@ import com.mobilechallenge.game.controllers.GameThread;
 import com.mobilechallenge.game.renderers.GameRenderer;
 import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
+import timber.log.Timber;
 
 public class GameActivity extends AppCompatActivity implements GameThread.LostCallback {
 
@@ -38,24 +39,33 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
 
   private boolean mRenderSet = false;
 
-  @OnClick(R.id.gl_surface) void onGlTouch() {
+  @OnClick(R.id.gl_surface) void toggleState() {
+    if (mStart.getVisibility() == View.VISIBLE) {
+      resume();
+    } else {
+      pause();
+    }
+  }
 
+  private void pause() {
     if (mGameThread.isRunning()) {
-      mGameThread.setIsRunning(false);
+      mGameThread.setIsRunning(false); // pause game
     }
 
-    if (mStart.getVisibility() == View.VISIBLE) {
+    mStart.setText(mResumeString);
+    mStart.setVisibility(View.VISIBLE);
+  }
 
-      mStart.setVisibility(View.GONE);
-      if (mRenderSet) {
-        mGameThread = getNewThread(false);
-        mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
-        mGlSurfaceView.onResume();
-        mGameThread.start();
-      }
-    } else {
-      mStart.setText(mResumeString);
-      mStart.setVisibility(View.VISIBLE);
+  private void resume() {
+    if (mGameThread.isRunning()) {
+      mGameThread.setIsRunning(false); // if preview is running
+    }
+
+    mStart.setVisibility(View.GONE);
+    if (mRenderSet) {
+      mGameThread = getNewThread(false); // start new thread
+      mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
+      mGameThread.start();
     }
   }
 
@@ -67,7 +77,6 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
 
     mGameThread = getNewThread(true);
     mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
-    mGlSurfaceView.onResume();
     mGameThread.start();
   }
 
@@ -75,6 +84,9 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_game);
     ButterKnife.bind(this);
+
+    Timber.d("OnCreate called.");
+
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
     mGyroscope = new Gyroscope(this);
@@ -90,6 +102,12 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
       mStart.setText(mStartString);
     }
 
+    Timber.d("OnResume called and mStart has this text: %s", mStart.getText().toString());
+
+    if (mRenderSet) {
+      mGlSurfaceView.onResume();
+    }
+
     mGyroscope.start();
   }
 
@@ -97,11 +115,7 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
     if (mRenderSet) {
       mGlSurfaceView.onPause();
     }
-
-    if (mGameThread.isRunning()) {
-      mGameThread.setIsRunning(false);
-    }
-
+    pause();
     super.onPause();
   }
 
@@ -120,11 +134,30 @@ public class GameActivity extends AppCompatActivity implements GameThread.LostCa
       //Request an Open ES 2.0 compatible context.
       mGlSurfaceView.setEGLContextClientVersion(2);
       mGameRenderer = new GameRenderer(this);
-      mGameThread = getNewThread(true);
+
+      final boolean saved = mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false);
+
+      if (saved) {
+        mGameThread = getNewThread(false); // new thread with saved data
+
+        // because it sets to false, when restoring, and this isn't full restore, just preview
+        mSharedPreferences.edit().putBoolean(GameMechanics.PREFS_IS_SAVED, true).apply();
+      } else {
+        mGameThread = getNewThread(true); // preview
+      }
       mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());
       mGlSurfaceView.setRenderer(mGameRenderer);
       mGlSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-      mGameThread.start();
+
+      if (saved) {
+        mGlSurfaceView.requestRender(); // render last frame, to see your position
+        mStart.setText(mResumeString);
+      } else {
+        mGameThread.start(); // start preview
+        mStart.setText(mStartString);
+      }
+
+      Timber.d("InitSurface, game is saved: %b.", saved);
       mRenderSet = true;
     } else {
       Toast.makeText(this, "This device does not support OpenGL ES 2.0.", Toast.LENGTH_LONG).show();

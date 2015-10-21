@@ -161,7 +161,6 @@ public class GameMechanics {
     mStartEnemyVector = params.getStartEnemyVector();
     mDifficultyLevel = params.getDifficultyLevel();
     mAspectRatio = params.getAspectRatio();
-    Timber.d("Aspect ration from params is %f.", mAspectRatio);
 
     mIsInited = true;
   }
@@ -187,7 +186,6 @@ public class GameMechanics {
           || chipPosition.x > RIGHT_BOUND - ChipObject.RADIUS / mAspectRatio
           || chipPosition.y > TOP_BOUND - ChipObject.RADIUS
           || chipPosition.y < BOTTOM_BOUND + ChipObject.RADIUS) {
-        Timber.d("Aspect ratio is %f", mAspectRatio);
         Timber.d("Lost by touching bounds. Pos is (%f,%f).", chipPosition.x, chipPosition.y);
         return false; // lose
       }

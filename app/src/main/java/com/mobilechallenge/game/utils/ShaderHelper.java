@@ -14,7 +14,6 @@ import static android.opengl.GLES20.glCreateShader;
 import static android.opengl.GLES20.glDeleteProgram;
 import static android.opengl.GLES20.glDeleteShader;
 import static android.opengl.GLES20.glGetProgramiv;
-import static android.opengl.GLES20.glGetShaderInfoLog;
 import static android.opengl.GLES20.glGetShaderiv;
 import static android.opengl.GLES20.glLinkProgram;
 import static android.opengl.GLES20.glShaderSource;
@@ -40,7 +39,6 @@ public class ShaderHelper {
 
     if (shaderObjectId == 0) {
       Timber.w("Could not create new shader");
-
       return 0;
     }
     glShaderSource(shaderObjectId, shaderCode);
@@ -50,8 +48,8 @@ public class ShaderHelper {
     final int[] compileStatus = new int[1];
     glGetShaderiv(shaderObjectId, GL_COMPILE_STATUS, compileStatus, 0);
 
-    Timber.v("Results of compiling source:" + "\n" + shaderCode + "\n:" + glGetShaderInfoLog(
-        shaderObjectId));
+    /*Timber.v("Results of compiling source:" + "\n" + shaderCode + "\n:" + glGetShaderInfoLog(
+        shaderObjectId));*/
 
     if (compileStatus[0] == 0) {
       glDeleteShader(shaderObjectId);

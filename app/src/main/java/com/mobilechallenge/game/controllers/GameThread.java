@@ -103,6 +103,7 @@ public class GameThread extends Thread {
     if (!mIsPreview) {
       if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
         mGameMechanics.restoreGame();
+        Timber.d("I'm restoring game.");
       } else {
         mGameMechanics.setGameLevel(
             mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL1));
