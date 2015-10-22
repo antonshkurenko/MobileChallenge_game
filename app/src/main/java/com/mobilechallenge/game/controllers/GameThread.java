@@ -99,10 +99,21 @@ public class GameThread extends Thread {
           countInterpolation(nextGameTick);
           mView.requestRender();
           mIsLost = true;
-
           stepsTime = System.currentTimeMillis() - startTime;
-          mGameMechanics.setTimePassed(stepsTime + startTimePassed);
-          mEventsCallback.onLostGame(getFormattedTime(stepsTime + startTimePassed));
+          final long finalTime = stepsTime + startTimePassed;
+          mGameMechanics.setTimePassed(finalTime);
+
+          long highscore = mSharedPreferences.getLong(
+              GameMechanics.PREFS_HIGHSCORE_PREFIX + mGameMechanics.getDifficultyLevel(), 0l);
+
+          if (finalTime > highscore) {
+            mSharedPreferences.edit()
+                .putLong(GameMechanics.PREFS_HIGHSCORE_PREFIX + mGameMechanics.getDifficultyLevel(),
+                    finalTime)
+                .apply();
+            highscore = finalTime;
+          }
+          mEventsCallback.onLostGame(getFormattedTime(finalTime), getFormattedTime(highscore));
           break gameCycle; // You lost
         }
         nextGameTick += SKIP_TICKS;
@@ -151,9 +162,8 @@ public class GameThread extends Thread {
 
     void onUpdate(String time);
 
-    void onLostGame(String finalTime);
+    void onLostGame(String finalTime, String highscore);
 
     void onEndGame();
   }
-
 }

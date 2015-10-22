@@ -38,6 +38,8 @@ public class GameActivity extends AppCompatActivity
   @Bind(R.id.difficulty_text) TextView mDifficultyText;
   @Bind(R.id.level_label) TextView mLevelLabel;
   @Bind(R.id.score_label) TextView mScoreLabel;
+  @Bind(R.id.highscore_label) TextView mHighscoreLabel;
+  @Bind(R.id.highscore) TextView mHighscore;
   @Bind(R.id.score) TextView mScore;
   @Bind(R.id.score_layout) LinearLayout mScoreLayout;
 
@@ -93,11 +95,12 @@ public class GameActivity extends AppCompatActivity
     }
   }
 
-  @Override public void onLostGame(String finalTime) {
+  @Override public void onLostGame(String finalTime, String highscore) {
 
     mScoreOpened = true;
     runOnUiThread(() -> {
       mScore.setText(finalTime);
+      mHighscore.setText(highscore);
       mScoreLayout.setVisibility(View.VISIBLE);
     });
 
@@ -139,6 +142,8 @@ public class GameActivity extends AppCompatActivity
     mLevelLabel.setTypeface(typeface);
     mTimerText.setTypeface(typeface);
     mScoreLabel.setTypeface(typeface);
+    mHighscoreLabel.setTypeface(typeface);
+    mHighscore.setTypeface(typeface);
     mScore.setTypeface(typeface);
     mDifficultyBar.setOnSeekBarChangeListener(this);
 

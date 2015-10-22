@@ -28,6 +28,7 @@ public class GameMechanics {
 
   public static final String PREFS_IS_SAVED = "hey_i_just_met_you";
   public static final String PREFS_LEVEL = "relax_don_t_do_it";
+  public static final String PREFS_HIGHSCORE_PREFIX = "angels_with_dirty_faces";
 
   public static final float RIGHT_BOUND = 1.05f; // there is some bug in logic
   public static final float LEFT_BOUND = -1.05f; // so I have to add this 0.05, to fix bounds
@@ -133,6 +134,10 @@ public class GameMechanics {
 
   public boolean isLollipop() {
     return mLollipop;
+  }
+
+  public int getDifficultyLevel() {
+    return mDifficultyLevel;
   }
 
   /*********************************************/

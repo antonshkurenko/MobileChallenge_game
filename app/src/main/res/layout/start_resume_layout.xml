@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_super_giant"
+        android:text="@string/start"
+        android:layout_centerInParent="true"
+        style="@style/GameTextViews"/>
+
+
+    <SeekBar
+        android:id="@+id/difficulty_level_bar"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/start_button"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:max="9"/>
+
+    <TextView
+        android:id="@+id/difficulty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_giant"
+        android:textColor="@android:color/black"
+        android:text="@string/difficulty_template"
+        android:layout_below="@id/difficulty_level_bar"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"/>
+    <TextView
+        android:id="@+id/level_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/level"
+        android:layout_toRightOf="@+id/difficulty_text"
+        android:layout_toEndOf="@+id/difficulty_text"
+        android:layout_alignBaseline="@+id/difficulty_text"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/text_size_medium"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:visibility="gone"
+        />
+
+</merge>
