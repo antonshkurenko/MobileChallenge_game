@@ -77,8 +77,8 @@ public class Geometry {
       return center.distanceTo(with.center) <= radius + with.radius;
     }
 
-    public boolean softIntersects(Circle with) {
-      return center.distanceTo(with.center) <= (radius + with.radius) * 0.77f;
+    public boolean intersectsSoft(Circle with) {
+      return center.distanceTo(with.center) <= (radius + with.radius) * 0.75f;
     }
   }
 
@@ -108,9 +108,7 @@ public class Geometry {
     public final float x, y, z;
 
     public Vector(float x, float y) {
-      this.x = x;
-      this.y = y;
-      this.z = 0f;
+      this(x, y, 0f);
     }
 
     public Vector(float x, float y, float z) {

@@ -29,10 +29,10 @@ public class GameMechanics {
   public static final String PREFS_IS_SAVED = "hey_i_just_met_you";
   public static final String PREFS_LEVEL = "relax_don_t_do_it";
 
-  private static final float RIGHT_BOUND = 1.05f; // there is some bug in logic
-  private static final float LEFT_BOUND = -1.05f; // so I have to add this 0.05, to fix bounds
-  private static final float TOP_BOUND = 1f;
-  private static final float BOTTOM_BOUND = -1f;
+  public static final float RIGHT_BOUND = 1.05f; // there is some bug in logic
+  public static final float LEFT_BOUND = -1.05f; // so I have to add this 0.05, to fix bounds
+  public static final float TOP_BOUND = 1f;
+  public static final float BOTTOM_BOUND = -1f;
 
   private final Context mContext;
   private final Gyroscope mGyroscope;
@@ -54,11 +54,17 @@ public class GameMechanics {
 
   private boolean mIsInited = false;
 
+  private boolean mLollipop; // little easter egg;
+
   public GameMechanics(Context ctx, Gyroscope gyroscope) {
     mContext = ctx;
     mGyroscope = gyroscope;
     mRandom = new Random();
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+    final float r = mRandom.nextFloat();
+    Timber.d("Random is %f", r);
+    mLollipop = r <= 0.1f;
   }
 
   /**
@@ -123,6 +129,10 @@ public class GameMechanics {
 
   public Geometry.Vector getStartEnemyVector() {
     return mStartEnemyVector;
+  }
+
+  public boolean isLollipop() {
+    return mLollipop;
   }
 
   /*********************************************/
@@ -237,9 +247,9 @@ public class GameMechanics {
 
       enemy.move();
 
-      if (i == 0 && mMaxSpeed > 0.0f) {
+      /*if (i == 0 && mMaxSpeed > 0.0f) {
         Timber.d("Speed is %f, max speed is %f.", enemy.getSpeed().length(), mMaxSpeed);
-      }
+      }*/
       if (enemy.getSpeed().length() <= mMaxSpeed) {
         enemy.accelerate(mAcceleration);
       }
@@ -261,7 +271,7 @@ public class GameMechanics {
 
       if (chipCircle != null) {
         final Geometry.Circle enemyCircle = new Geometry.Circle(position, EnemyObject.RADIUS);
-        if (enemyCircle.softIntersects(chipCircle)) {
+        if (enemyCircle.intersectsSoft(chipCircle)) {
           Timber.d("Lost by touching enemies.");
           return false; // you lost
         }
@@ -340,6 +350,13 @@ public class GameMechanics {
       this.mTimePassed = timePassed;
     }
 
+    /**
+     * Here customize levels
+     * @param rnd {@link Random} for utils
+     * @param level difficulty level [1..10]
+     * @param aspectRatio screen aspect ratio
+     * @return made game params for current level
+     */
     public static GameParams level(Random rnd, @DifficultyLevel int level, float aspectRatio) {
 
       final float rightX = RIGHT_BOUND - EnemyObject.RADIUS / aspectRatio;
@@ -364,8 +381,8 @@ public class GameMechanics {
             add(startEnemyVector.rotateRandom(rnd));
           }})
           .setStartEnemyVector(startEnemyVector).setMaxSpeed(
-              0.01f * (float) Math.sqrt(2f * level)) // same
-          .setAcceleration(0.0000025f * level) // todo(me), 10/21/15: calculate nice algorithm
+              0.0225f) // same
+          .setAcceleration(0.00000075f * level + 0.000001f) // todo(me), 10/21/15: calculate nice algorithm
           .setDifficultyLevel(level).build();
     }
 

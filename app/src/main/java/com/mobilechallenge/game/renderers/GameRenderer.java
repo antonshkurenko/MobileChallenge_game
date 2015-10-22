@@ -38,6 +38,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private static final int VERY_ANGRY = 1;
   private static final int SAD = 2;
   private static final int SMILE = 3;
+  private static final int SCARED = 4;
+  private static final int LOLLIPOP = 5;
 
   // @formatter:off
         private final float[] mProjectionMatrix = new float[16];
@@ -48,6 +50,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
   private final float [          ] mOrange = new float[] { 0.996078431f, 0.301960784f, 0.066666667f };
        private final float [] mRed = new float[] { 1f, 0.066666667f, 0f };
        private final float [] mGreen = new float[] { 0.101960784f, 0.580392157f, 0.192156863f };
+       private final float [] mBlue = new float[] { 0f, 0f, 0.690196078f };
+       private final float [] mWhite = new float[] { 1f, 1f, 1f };
   // @formatter:on
   private final Context mContext;
 
@@ -88,7 +92,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     mTextures = TextureHelper.loadTextures(mContext, R.drawable.texture_angry_256_256,
         R.drawable.texture_very_angry_256_256, R.drawable.texture_sad_256_256,
-        R.drawable.texture_smile_256_256);
+        R.drawable.texture_smile_256_256, R.drawable.texture_scared_256_256,
+        R.drawable.texture_test_256_256);
   }
 
   @Override public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -124,26 +129,58 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      */
     mTextureProgram.useProgram();
 
+    final ChipObject chip = mGameMechanics.getChipObject();
+    final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
+
     /**
      * Drawing chip
      */
-
-    final ChipObject chip = mGameMechanics.getChipObject();
 
     if (chip != null) {
       final Geometry.Point chipPosition = chip.getInterpolatedPosition(mInterpolation);
 
       mChipView.bindData(mTextureProgram);
       positionObjectInScene(chipPosition.x, chipPosition.y);
-      mTextureProgram.setUniforms(mModelProjectionMatrix, mGreen, mTextures[SMILE], 0);
+
+      final int texture;
+      final float[] color;
+      if(mGameMechanics.isLollipop()) {
+        texture = LOLLIPOP;
+        color = mWhite;
+      } else {
+
+        if (enemies != null) {
+          float minLength = Float.POSITIVE_INFINITY;
+          color = new float[3];
+
+          // check if chip is close to enemies
+          for (EnemyObject enemy : enemies) {
+            minLength = Math.min(minLength, chipPosition.distanceTo(enemy.getPosition()));
+          }
+
+          final float k = minLength / 1f;
+          for (int j = 0; j < 3; j++) {
+            color[j] = 0.5f * ((1f - k) * mBlue[j] + k * mGreen[j]) + 0.5f * mGreen[j];
+          }
+
+          if(k < 0.33f) {
+            texture = SCARED;
+          } else {
+            texture = SMILE;
+          }
+
+        } else {
+          color = mGreen;
+          texture = SMILE;
+        }
+      }
+      mTextureProgram.setUniforms(mModelProjectionMatrix, color, mTextures[texture], 0);
       chip.draw();
     }
 
     /**
      * Drawing enemies
      */
-
-    final List<EnemyObject> enemies = mGameMechanics.getEnemyObjects();
 
     if (enemies != null) {
       mEnemyView.bindData(mTextureProgram);

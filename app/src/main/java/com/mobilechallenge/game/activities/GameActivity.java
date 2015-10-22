@@ -144,7 +144,8 @@ public class GameActivity extends AppCompatActivity
 
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-    final int difficulty = mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, 1);
+    final int difficulty =
+        mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL5);
 
     mDifficultyBar.setProgress(difficulty - 1);
     mDifficultyText.setText(difficulty + "");
@@ -176,7 +177,7 @@ public class GameActivity extends AppCompatActivity
       mGlSurfaceView.onPause();
     }
 
-    if(mScoreOpened) {
+    if (mScoreOpened) {
       closeScore();
     }
 

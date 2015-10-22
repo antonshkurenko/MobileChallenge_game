@@ -49,14 +49,14 @@ public class DefaultTextureProgram extends AbstractShaderProgram {
    */
   public void setUniforms(float[] matrix, @NonNull float[] color, int textureId, int glTextureNum) {
 
-    if (color.length != 3) {
+    if (!(color.length == 3 || color.length == 4)) {
       throw new IllegalArgumentException(
-          "Wrong color array length, it must be 4, but it's " + color.length + ".");
+          "Wrong color array length, it must be 3 or 4, but it's " + color.length + ".");
     }
 
     glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
 
-    glUniform4f(uColorLocation, color[0], color[1], color[2], 1f);
+    glUniform4f(uColorLocation, color[0], color[1], color[2], color.length == 4 ? color[3] : 1f);
 
     glActiveTexture(GL_TEXTURE0 + glTextureNum);
     glBindTexture(GL_TEXTURE_2D, textureId);
