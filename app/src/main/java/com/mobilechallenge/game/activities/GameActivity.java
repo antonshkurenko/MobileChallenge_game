@@ -155,7 +155,7 @@ public class GameActivity extends AppCompatActivity
     getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-    final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
+    final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf");
     mStart.setTypeface(typeface);
     mDifficultyText.setTypeface(typeface);
     mLevelLabel.setTypeface(typeface);

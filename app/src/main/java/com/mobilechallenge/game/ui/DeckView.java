@@ -24,10 +24,10 @@ public class DeckView implements Drawable {
   private static final float[] VERTEX_DATA = {
       // Order of coordinates: X, Y, R, G, B
       // Triangle strip
-      1f, 1f, 0.9f, 0.9f, 0.9f,
-      -1f, 1f, 0.9f, 0.9f, 0.9f, // linear gradient from top to
-      1f, -1f, 0.6f, 0.6f, 0.6f, // bottom
-      -1f, -1f, 0.6f, 0.6f, 0.6f,
+      1f, 1f, 0.768627451f, 0.949019608f, 1f,
+      -1f, 1f, 0.768627451f, 0.949019608f, 1f, // linear gradient from top to
+      1f, -1f, 0.917647059f, 0.976470588f, 1f, // bottom
+      -1f, -1f, 0.917647059f, 0.976470588f, 1f,
   };
   // @formatter:on
 

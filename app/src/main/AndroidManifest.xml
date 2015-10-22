@@ -4,7 +4,6 @@
 
   <!-- I need them -->
   <uses-feature android:name="android.hardware.sensor.accelerometer" />
-  <uses-feature android:name="android.hardware.sensor.compass" />
 
   <!-- that's for rollbar integration -->
   <uses-permission android:name="android.permission.INTERNET" />

@@ -105,6 +105,7 @@ public class Gyroscope implements SensorEventListener {
       return;
     }
 
+    // fixme(me), 10/22/15: cool, but tablet inverts y
     switch (mDisplay.getRotation()) {
       case Surface.ROTATION_0:
         addSensorValue(event.values[0], -event.values[1]);
