@@ -34,4 +34,16 @@
       android:layout_marginEnd="25dp"
       android:textColor="@android:color/black"/>
 
+    <TextView
+        android:id="@+id/share"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/share"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:textSize="@dimen/text_size_big"
+        style="@style/GameTextViews" />
+
 </RelativeLayout>

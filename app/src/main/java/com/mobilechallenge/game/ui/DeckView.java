@@ -4,7 +4,7 @@ import com.mobilechallenge.game.objects.Drawable;
 import com.mobilechallenge.game.programs.SimpleVaryingColorShaderProgram;
 import com.mobilechallenge.game.utils.VertexArray;
 
-import static android.opengl.GLES20.GL_TRIANGLE_FAN;
+import static android.opengl.GLES20.GL_TRIANGLE_STRIP;
 import static android.opengl.GLES20.glDrawArrays;
 import static com.mobilechallenge.game.utils.Constants.BYTES_PER_FLOAT;
 
@@ -23,13 +23,11 @@ public class DeckView implements Drawable {
   // @formatter:off
   private static final float[] VERTEX_DATA = {
       // Order of coordinates: X, Y, R, G, B
-      // Triangle Fan
-      0f, 0f, 1f, 1f, 1f,
-      -1f, -1f, 0.7f, 0.7f, 0.7f,
-      1f, -1f, 0.7f, 0.7f, 0.7f,
-      1f, 1f, 0.7f, 0.7f, 0.7f,
-      -1f, 1f, 0.7f, 0.7f, 0.7f,
-      -1f, -1f, 0.7f, 0.7f, 0.7f,
+      // Triangle strip
+      1f, 1f, 0.9f, 0.9f, 0.9f,
+      -1f, 1f, 0.9f, 0.9f, 0.9f, // linear gradient from top to
+      1f, -1f, 0.6f, 0.6f, 0.6f, // bottom
+      -1f, -1f, 0.6f, 0.6f, 0.6f,
   };
   // @formatter:on
 
@@ -48,6 +46,6 @@ public class DeckView implements Drawable {
   }
 
   @Override public void draw() {
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
 }

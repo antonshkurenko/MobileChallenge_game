@@ -2,6 +2,7 @@ package com.mobilechallenge.game.activities;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Typeface;
@@ -42,9 +43,12 @@ public class GameActivity extends AppCompatActivity
   @Bind(R.id.highscore) TextView mHighscore;
   @Bind(R.id.score) TextView mScore;
   @Bind(R.id.score_layout) LinearLayout mScoreLayout;
+  @Bind(R.id.share) TextView mShare;
 
   @BindString(R.string.start) String mStartString;
   @BindString(R.string.resume) String mResumeString;
+
+  private static final int SHARE_REQ = 22;
 
   private Gyroscope mGyroscope;
   private GameThread mGameThread;
@@ -74,13 +78,27 @@ public class GameActivity extends AppCompatActivity
   }
 
   @OnClick(R.id.score_layout) void closeScore() {
+
     mScoreLayout.setVisibility(View.GONE);
+    mShare.setVisibility(View.GONE);
     mStart.setText(mStartString);
     mStart.setVisibility(View.VISIBLE);
     mDifficultyBar.setVisibility(View.VISIBLE);
     mDifficultyText.setVisibility(View.VISIBLE);
     mLevelLabel.setVisibility(View.VISIBLE);
     mScoreOpened = false;
+  }
+
+  @OnClick(R.id.share) void share() {
+    final Intent sendIntent = new Intent();
+    sendIntent.setAction(Intent.ACTION_SEND);
+    final int lvl = mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL,
+        GameMechanics.GameParams.LEVEL_PREVIEW);
+    sendIntent.putExtra(Intent.EXTRA_TEXT,
+        "I held on for " + mScore.getText().toString() + " on " + lvl
+            + " difficulty level in \"Game\". Can you beat my result?");
+    sendIntent.setType("text/plain");
+    startActivityForResult(sendIntent, SHARE_REQ);
   }
 
   @Override public void onStartGame() {
@@ -102,6 +120,7 @@ public class GameActivity extends AppCompatActivity
       mScore.setText(finalTime);
       mHighscore.setText(highscore);
       mScoreLayout.setVisibility(View.VISIBLE);
+      mShare.setVisibility(View.VISIBLE);
     });
 
     Timber.d("Lost with result %s.", finalTime);
@@ -145,6 +164,8 @@ public class GameActivity extends AppCompatActivity
     mHighscoreLabel.setTypeface(typeface);
     mHighscore.setTypeface(typeface);
     mScore.setTypeface(typeface);
+    mShare.setTypeface(typeface);
+
     mDifficultyBar.setOnSeekBarChangeListener(this);
 
     mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -167,8 +188,6 @@ public class GameActivity extends AppCompatActivity
     } else {
       mStart.setText(mStartString);
     }
-
-    Timber.d("OnResume called and mStart has this text: %s", mStart.getText().toString());
 
     if (mRenderSet) {
       mGlSurfaceView.onResume();
@@ -248,7 +267,12 @@ public class GameActivity extends AppCompatActivity
       mGameThread.setIsRunning(false); // pause game
     }
 
-    mStart.setText(mResumeString);
+    if (mSharedPreferences.getBoolean(GameMechanics.PREFS_IS_SAVED, false)) {
+      mStart.setText(mResumeString);
+    } else {
+      mStart.setText(mStartString);
+    }
+
     mStart.setVisibility(View.VISIBLE);
   }
 
