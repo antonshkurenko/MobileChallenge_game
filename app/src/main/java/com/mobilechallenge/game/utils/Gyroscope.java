@@ -6,16 +6,25 @@ package com.mobilechallenge.game.utils;
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
 
+// todo(me), 10/22/15: friends tested, on two phones it doesn't work, check for gyroscope
+
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
 public class Gyroscope implements SensorEventListener {
+
+  private Context mContext;
 
   private SensorManager mSensorManager;
 
@@ -27,7 +36,10 @@ public class Gyroscope implements SensorEventListener {
    private float[    ] mOrientationArray = new float[2];
   // @formatter:on
 
+  private boolean mMessageShown = false;
+
   public Gyroscope(Context context) {
+    mContext = context;
     mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     mDisplay =
         ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -41,12 +53,12 @@ public class Gyroscope implements SensorEventListener {
   public synchronized float[] getOrientationArray() {
 
     float avgX = 0, avgY = 0;
-    for(int i = 0; i < 10; i++) {
-      avgX+=mSensorX[i];
-      avgY+=mSensorY[i];
+    for (int i = 0; i < 10; i++) {
+      avgX += mSensorX[i];
+      avgY += mSensorY[i];
     }
-    avgX/=10;
-    avgY/=10;
+    avgX /= 10;
+    avgY /= 10;
     mOrientationArray[0] = avgX;
     mOrientationArray[1] = avgY;
 
@@ -73,7 +85,23 @@ public class Gyroscope implements SensorEventListener {
       return;
     }
 
-    if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+    if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE && !mMessageShown) {
+
+      new DialogFragment() {
+        @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+          return new AlertDialog.Builder(mContext).setTitle("Sensor is unreliable.")
+              .setMessage(
+                  "Game will use this accelerometer data,"
+                      + " but, firstly for your good, you have to recalibrate it."
+                      + "This message is shown just once per app launch.")
+              .setIcon(android.R.drawable.ic_dialog_alert)
+              .setPositiveButton("Ok :(", (dialog, which) -> dialog.dismiss())
+              .show();
+        }
+      }.show(((AppCompatActivity) mContext).getFragmentManager(), "dialog");
+
+      mMessageShown = true;
+
       return;
     }
 
