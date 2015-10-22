@@ -87,21 +87,8 @@ public class Gyroscope implements SensorEventListener {
 
     if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE && !mMessageShown) {
 
-      new DialogFragment() {
-        @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
-          return new AlertDialog.Builder(mContext).setTitle("Sensor is unreliable.")
-              .setMessage(
-                  "Game will use this accelerometer data,"
-                      + " but, firstly for your good, you have to recalibrate it."
-                      + "This message is shown just once per app launch.")
-              .setIcon(android.R.drawable.ic_dialog_alert)
-              .setPositiveButton("Ok :(", (dialog, which) -> dialog.dismiss())
-              .show();
-        }
-      }.show(((AppCompatActivity) mContext).getFragmentManager(), "dialog");
-
+      new WarningFragment().show(((AppCompatActivity) mContext).getFragmentManager(), "dialog");
       mMessageShown = true;
-
       return;
     }
 
@@ -132,5 +119,19 @@ public class Gyroscope implements SensorEventListener {
     }
     mSensorX[9] = x;
     mSensorY[9] = y;
+  }
+
+  public static class WarningFragment extends DialogFragment {
+
+    @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
+      return new AlertDialog.Builder(getActivity()).setTitle("Sensor is unreliable.")
+          .setMessage(
+              "Game will use this accelerometer data,"
+                  + " but, firstly for your good, you have to recalibrate it."
+                  + "This message is shown just once per app launch.")
+          .setIcon(android.R.drawable.ic_dialog_alert)
+          .setPositiveButton("Ok :(", (dialog, which) -> dialog.dismiss())
+          .show();
+    }
   }
 }
