@@ -6,11 +6,10 @@ package com.mobilechallenge.game.utils;
  * Code style: SquareAndroid (https://github.com/square/java-code-styles)
  */
 
-// todo(me), 10/22/15: friends tested, on two phones it doesn't work, check for gyroscope
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,8 +20,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+import timber.log.Timber;
 
-public class Gyroscope implements SensorEventListener {
+public class Gyroscope
+    implements SensorEventListener, SharedPreferences.OnSharedPreferenceChangeListener {
+
+  public static final String PREFS_INVERT_X = "psychosocial";
+  public static final String PREFS_INVERT_Y = "don_t_let_the_ones_that_want_to_steal_your_dreams";
+  public static final String PREFS_SENSITIVITY = "but_the_most_special_are_the_most_lonely";
+
+  public static final int STRAIGHT = 1;
+  public static final int INVERSE = -1;
 
   private Context mContext;
 
@@ -36,6 +44,11 @@ public class Gyroscope implements SensorEventListener {
    private float[    ] mOrientationArray = new float[2];
   // @formatter:on
 
+  private int mInvertX = STRAIGHT; // STRAIGHT or INVERSE
+  private int mInvertY = STRAIGHT;
+
+  private int mSensitivity = 50; // default
+
   private boolean mMessageShown = false;
 
   public Gyroscope(Context context) {
@@ -43,6 +56,18 @@ public class Gyroscope implements SensorEventListener {
     mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
     mDisplay =
         ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+  }
+
+  public void setInvertX(int invertX) {
+    mInvertX = invertX;
+  }
+
+  public void setInvertY(int invertY) {
+    mInvertY = invertY;
+  }
+
+  public void setSensitivity(int sensitivity) {
+    mSensitivity = sensitivity;
   }
 
   /**
@@ -59,8 +84,8 @@ public class Gyroscope implements SensorEventListener {
     }
     avgX /= 10;
     avgY /= 10;
-    mOrientationArray[0] = avgX;
-    mOrientationArray[1] = avgY;
+    mOrientationArray[0] = avgX * mInvertX / (100 - mSensitivity);
+    mOrientationArray[1] = avgY * mInvertY / (100 - mSensitivity);
 
     return mOrientationArray;
   }
@@ -73,6 +98,26 @@ public class Gyroscope implements SensorEventListener {
 
   public void stop() {
     mSensorManager.unregisterListener(this);
+  }
+
+  @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+    Timber.d("Preferences changed");
+    switch (key) {
+      case PREFS_INVERT_X:
+        Timber.d("X inversion");
+        mInvertX = sharedPreferences.getInt(key, STRAIGHT);
+        break;
+      case PREFS_INVERT_Y:
+        Timber.d("Y inversion");
+        mInvertY = sharedPreferences.getInt(key, STRAIGHT);
+        break;
+      case PREFS_SENSITIVITY:
+        Timber.d("Sensitivity");
+        mSensitivity = sharedPreferences.getInt(key, 50);
+        break;
+      default:
+        //ignored
+    }
   }
 
   @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -125,8 +170,7 @@ public class Gyroscope implements SensorEventListener {
 
     @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
       return new AlertDialog.Builder(getActivity()).setTitle("Sensor is unreliable.")
-          .setMessage(
-              "Game will use this accelerometer data,"
+          .setMessage("Game will use this accelerometer data,"
                   + " but, firstly for your good, you have to recalibrate it."
                   + "This message is shown just once per app launch.")
           .setIcon(android.R.drawable.ic_dialog_alert)

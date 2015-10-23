@@ -222,8 +222,7 @@ public class GameMechanics {
 
     final Geometry.Circle chipCircle;
     if (mChipObject != null) {
-      // todo(me), 10/21/15: add sensitivity prefs
-      mChipObject.setSpeed(new Geometry.Vector(-orientation[0] / 50, -orientation[1] / 50));
+      mChipObject.setSpeed(new Geometry.Vector(-orientation[0], -orientation[1]));
       mChipObject.move();
 
       final Geometry.Point chipPosition = mChipObject.getPosition();

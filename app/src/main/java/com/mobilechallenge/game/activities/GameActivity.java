@@ -22,6 +22,7 @@ import android.widget.Toast;
 import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import com.mobilechallenge.game.R;
 import com.mobilechallenge.game.controllers.GameMechanics;
@@ -113,13 +114,13 @@ public class GameActivity extends AppCompatActivity
 
   // god damn me in the past
   @OnClick(R.id.open_settings) void toggleSettings() {
-    if(mSettings.getVisibility() == View.VISIBLE) {
+    if (mSettings.getVisibility() == View.VISIBLE) {
       mSettingsOpened = false;
       mSettings.setVisibility(View.GONE);
       mStart.setVisibility(View.VISIBLE);
 
       // really, think about better architecture
-      if(mStart.getText().toString().equals(mStartString)) {
+      if (mStart.getText().toString().equals(mStartString)) {
         mDifficultyText.setVisibility(View.VISIBLE);
         mDifficultyBar.setVisibility(View.VISIBLE);
         mLevelLabel.setVisibility(View.VISIBLE);
@@ -128,7 +129,7 @@ public class GameActivity extends AppCompatActivity
       mStart.setVisibility(View.GONE);
 
       // unbelievable
-      if(mStart.getText().toString().equals(mStartString)) {
+      if (mStart.getText().toString().equals(mStartString)) {
         mDifficultyText.setVisibility(View.GONE);
         mDifficultyBar.setVisibility(View.GONE);
         mLevelLabel.setVisibility(View.GONE);
@@ -148,6 +149,18 @@ public class GameActivity extends AppCompatActivity
             + " difficulty level in \"Game\". Can you beat my result?");
     sendIntent.setType("text/plain");
     startActivityForResult(sendIntent, SHARE_REQ);
+  }
+
+  @OnCheckedChanged(R.id.invert_x) void invertX(boolean b) {
+    mSharedPreferences.edit()
+        .putInt(Gyroscope.PREFS_INVERT_X, b ? Gyroscope.STRAIGHT : Gyroscope.INVERSE)
+        .apply();
+  }
+
+  @OnCheckedChanged(R.id.invert_y) void invertY(boolean b) {
+    mSharedPreferences.edit()
+        .putInt(Gyroscope.PREFS_INVERT_Y, b ? Gyroscope.STRAIGHT : Gyroscope.INVERSE)
+        .apply();
   }
 
   @Override public void onStartGame() {
@@ -186,7 +199,9 @@ public class GameActivity extends AppCompatActivity
   }
 
   @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-    mDifficultyText.setText((progress + 1) + "");
+    if (seekBar.getId() == R.id.difficulty_level_bar) {
+      mDifficultyText.setText((progress + 1) + "");
+    }
   }
 
   @Override public void onStartTrackingTouch(SeekBar seekBar) {
@@ -194,7 +209,15 @@ public class GameActivity extends AppCompatActivity
   }
 
   @Override public void onStopTrackingTouch(SeekBar seekBar) {
-    mSharedPreferences.edit().putInt(GameMechanics.PREFS_LEVEL, seekBar.getProgress() + 1).apply();
+    if (seekBar.getId() == R.id.difficulty_level_bar) {
+      mSharedPreferences.edit()
+          .putInt(GameMechanics.PREFS_LEVEL, seekBar.getProgress() + 1)
+          .apply();
+    } else if (seekBar.getId() == R.id.sensitivity) {
+      mSharedPreferences.edit()
+          .putInt(Gyroscope.PREFS_SENSITIVITY, seekBar.getProgress() + 1)
+          .apply();
+    }
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -205,6 +228,37 @@ public class GameActivity extends AppCompatActivity
     getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+
+    mGyroscope = new Gyroscope(this);
+    mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+    initTypeface();
+
+    mDifficultyBar.setOnSeekBarChangeListener(this);
+    mSensitivity.setOnSeekBarChangeListener(this);
+
+    final int sensitivity = mSharedPreferences.getInt(Gyroscope.PREFS_SENSITIVITY, 50);
+    mSensitivity.setProgress(sensitivity);
+    mGyroscope.setSensitivity(sensitivity);
+
+    final int inverseX = mSharedPreferences.getInt(Gyroscope.PREFS_INVERT_X, Gyroscope.STRAIGHT);
+    mInvertX.setChecked(inverseX == Gyroscope.STRAIGHT);
+    mGyroscope.setInvertX(inverseX);
+
+    final int inverseY = mSharedPreferences.getInt(Gyroscope.PREFS_INVERT_Y, Gyroscope.STRAIGHT);
+    mInvertY.setChecked(inverseY == Gyroscope.STRAIGHT);
+    mGyroscope.setInvertY(inverseY);
+
+    final int difficulty =
+        mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL5);
+
+    mDifficultyBar.setProgress(difficulty - 1);
+    mDifficultyText.setText(difficulty + "");
+
+    initSurface();
+  }
+
+  private void initTypeface() {
     final Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Regular.ttf");
     mStart.setTypeface(typeface);
     mDifficultyText.setTypeface(typeface);
@@ -218,19 +272,6 @@ public class GameActivity extends AppCompatActivity
     mInvertX.setTypeface(typeface);
     mInvertY.setTypeface(typeface);
     mSensitivityLabel.setTypeface(typeface);
-
-    mDifficultyBar.setOnSeekBarChangeListener(this);
-
-    mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-    final int difficulty =
-        mSharedPreferences.getInt(GameMechanics.PREFS_LEVEL, GameMechanics.GameParams.LEVEL5);
-
-    mDifficultyBar.setProgress(difficulty - 1);
-    mDifficultyText.setText(difficulty + "");
-
-    mGyroscope = new Gyroscope(this);
-    initSurface();
   }
 
   @Override protected void onResume() {
@@ -247,6 +288,7 @@ public class GameActivity extends AppCompatActivity
     }
 
     mGyroscope.start();
+    mSharedPreferences.registerOnSharedPreferenceChangeListener(mGyroscope);
   }
 
   @Override protected void onPause() {
@@ -264,6 +306,7 @@ public class GameActivity extends AppCompatActivity
 
   @Override protected void onStop() {
     mGyroscope.stop();
+    mSharedPreferences.unregisterOnSharedPreferenceChangeListener(mGyroscope);
     super.onStop();
   }
 
