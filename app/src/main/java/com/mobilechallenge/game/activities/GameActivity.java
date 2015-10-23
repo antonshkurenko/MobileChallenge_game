@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -29,6 +31,10 @@ import com.mobilechallenge.game.utils.Gyroscope;
 import com.mobilechallenge.game.views.GameGlSurfaceView;
 import timber.log.Timber;
 
+/**
+ * I didn't think a lot about views here
+ * so here is view hell with sub-hells of visibility setters
+ */
 public class GameActivity extends AppCompatActivity
     implements GameThread.EventsCallback, SeekBar.OnSeekBarChangeListener {
 
@@ -44,6 +50,12 @@ public class GameActivity extends AppCompatActivity
   @Bind(R.id.score) TextView mScore;
   @Bind(R.id.score_layout) LinearLayout mScoreLayout;
   @Bind(R.id.share) TextView mShare;
+  @Bind(R.id.invert_x) CheckBox mInvertX;
+  @Bind(R.id.invert_y) CheckBox mInvertY;
+  @Bind(R.id.sensitivity_label) TextView mSensitivityLabel;
+  @Bind(R.id.sensitivity) SeekBar mSensitivity;
+  @Bind(R.id.settings) LinearLayout mSettings;
+  @Bind(R.id.open_settings) ImageButton mOpenSettings;
 
   @BindString(R.string.start) String mStartString;
   @BindString(R.string.resume) String mResumeString;
@@ -58,11 +70,21 @@ public class GameActivity extends AppCompatActivity
 
   private boolean mRenderSet = false;
 
+  // todo(me), 10/23/15: seems like adding more views this way to this layout is a little problem
+  // think about smth else
+  // a) state pattern
+  // b) transparent fragments
   private boolean mScoreOpened = false;
+  private boolean mSettingsOpened = false;
 
   @OnClick(R.id.gl_surface) void toggleState() {
     if (mScoreOpened) {
       closeScore();
+      return;
+    }
+
+    if (mSettingsOpened) {
+      toggleSettings();
       return;
     }
 
@@ -78,15 +100,42 @@ public class GameActivity extends AppCompatActivity
   }
 
   @OnClick(R.id.score_layout) void closeScore() {
-
+    mStart.setText(mStartString);
     mScoreLayout.setVisibility(View.GONE);
     mShare.setVisibility(View.GONE);
-    mStart.setText(mStartString);
     mStart.setVisibility(View.VISIBLE);
     mDifficultyBar.setVisibility(View.VISIBLE);
     mDifficultyText.setVisibility(View.VISIBLE);
     mLevelLabel.setVisibility(View.VISIBLE);
+    mOpenSettings.setVisibility(View.VISIBLE);
     mScoreOpened = false;
+  }
+
+  // god damn me in the past
+  @OnClick(R.id.open_settings) void toggleSettings() {
+    if(mSettings.getVisibility() == View.VISIBLE) {
+      mSettingsOpened = false;
+      mSettings.setVisibility(View.GONE);
+      mStart.setVisibility(View.VISIBLE);
+
+      // really, think about better architecture
+      if(mStart.getText().toString().equals(mStartString)) {
+        mDifficultyText.setVisibility(View.VISIBLE);
+        mDifficultyBar.setVisibility(View.VISIBLE);
+        mLevelLabel.setVisibility(View.VISIBLE);
+      }
+    } else {
+      mStart.setVisibility(View.GONE);
+
+      // unbelievable
+      if(mStart.getText().toString().equals(mStartString)) {
+        mDifficultyText.setVisibility(View.GONE);
+        mDifficultyBar.setVisibility(View.GONE);
+        mLevelLabel.setVisibility(View.GONE);
+      }
+      mSettings.setVisibility(View.VISIBLE);
+      mSettingsOpened = true;
+    }
   }
 
   @OnClick(R.id.share) void share() {
@@ -121,6 +170,7 @@ public class GameActivity extends AppCompatActivity
       mHighscore.setText(highscore);
       mScoreLayout.setVisibility(View.VISIBLE);
       mShare.setVisibility(View.VISIBLE);
+      mOpenSettings.setVisibility(View.GONE);
     });
 
     Timber.d("Lost with result %s.", finalTime);
@@ -165,6 +215,9 @@ public class GameActivity extends AppCompatActivity
     mHighscore.setTypeface(typeface);
     mScore.setTypeface(typeface);
     mShare.setTypeface(typeface);
+    mInvertX.setTypeface(typeface);
+    mInvertY.setTypeface(typeface);
+    mSensitivityLabel.setTypeface(typeface);
 
     mDifficultyBar.setOnSeekBarChangeListener(this);
 
@@ -274,6 +327,7 @@ public class GameActivity extends AppCompatActivity
     }
 
     mStart.setVisibility(View.VISIBLE);
+    mOpenSettings.setVisibility(View.VISIBLE);
   }
 
   private void resume() {
@@ -285,6 +339,7 @@ public class GameActivity extends AppCompatActivity
     mDifficultyBar.setVisibility(View.GONE);
     mDifficultyText.setVisibility(View.GONE);
     mLevelLabel.setVisibility(View.GONE);
+    mOpenSettings.setVisibility(View.GONE);
     if (mRenderSet) {
       mGameThread = getNewThread(false); // start new thread
       mGameRenderer.setGameMechanics(mGameThread.getGameMechanics());

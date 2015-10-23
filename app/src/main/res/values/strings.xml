@@ -11,4 +11,7 @@
   <string name="level">level</string>
   <string name="highscore_label">level highscore</string>
   <string name="share">share</string>
+  <string name="invert_x">Invert X axis</string>
+  <string name="invert_y">Invert Y axis</string>
+  <string name="sensor_sensitivity">Sensor sensitivity</string>
 </resources>

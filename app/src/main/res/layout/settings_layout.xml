@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:id="@+id/settings">
+
+  <CheckBox
+      android:id="@+id/invert_x"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:text="@string/invert_x"
+      android:textSize="@dimen/text_size_medium"/>
+
+  <CheckBox
+      android:id="@+id/invert_y"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:text="@string/invert_y"
+      android:textSize="@dimen/text_size_medium"/>
+
+  <TextView
+      android:id="@+id/sensitivity_label"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:text="@string/sensor_sensitivity"
+      android:textColor="@android:color/black"
+      android:textSize="@dimen/text_size_medium"/>
+
+  <SeekBar
+      android:id="@+id/sensitivity"
+      android:layout_width="220dp"
+      android:layout_height="wrap_content"/>
+
+</LinearLayout>
