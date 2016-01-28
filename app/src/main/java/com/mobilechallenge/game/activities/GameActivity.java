@@ -114,7 +114,8 @@ public class GameActivity extends AppCompatActivity
 
   // god damn me in the past
   @OnClick(R.id.open_settings) void toggleSettings() {
-    if (mSettings.getVisibility() == View.VISIBLE) {
+    // fix this
+    if (mSettings.getVisibility() == View.VISIBLE && mSettingsOpened) {
       mSettingsOpened = false;
       mSettings.setVisibility(View.GONE);
       mStart.setVisibility(View.VISIBLE);

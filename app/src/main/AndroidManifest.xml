@@ -16,7 +16,8 @@
       android:theme="@style/AppTheme"
       android:name=".Game">
     <activity android:name=".activities.GameActivity"
-        android:screenOrientation="landscape">
+        android:screenOrientation="landscape"
+        android:configChanges="orientation|keyboardHidden">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
